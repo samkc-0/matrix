@@ -3,7 +3,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 type Props = {
   label: string;
-  theme: "primary";
+  theme?: "primary";
 };
 
 export default function Button({ label, theme }: Props) {
