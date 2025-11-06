@@ -25,8 +25,15 @@ export default function Index() {
         <ImageViewer imgSource={PlaceholderImage} />
       </View>
       <View style={styles.footerContainer}>
-        <Button theme="primary" label="Choose a photo" />
-        <Button label="Use this photo" />
+        <Button
+          theme="primary"
+          label="Choose a photo"
+          onPress={pickImageAsync}
+        />
+        <Button
+          label="Use this photo"
+          onPress={() => alert("submitting not implemented")}
+        />
       </View>
     </View>
   );
