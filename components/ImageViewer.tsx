@@ -1,19 +1,20 @@
-import { ImageSourcePropType, StyleSheet } from "react-native"
-import { Image } from "expo-image"
+import { ImageSourcePropType, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 
 type Props = {
-  imgSource: ImageSourcePropType;
-}
+  placeholder: ImageSourcePropType;
+  selectedImage?: string;
+};
 
-export default function ImageViewer({ imgSource }: Props) {
-  return <Image source={imgSource} style={styles.image} />
+export default function ImageViewer({ placeholder, selectedImage }: Props) {
+  const src = selectedImage ? { uri: selectedImage } : placeholder;
+  return <Image source={src} style={styles.image} />;
 }
-
 
 const styles = StyleSheet.create({
   image: {
     width: 320,
     height: 440,
     borderRadius: 18,
-  }
+  },
 });
