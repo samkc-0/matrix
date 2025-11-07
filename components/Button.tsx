@@ -23,7 +23,7 @@ export default function Button({ label, theme, onPress }: Props) {
           <FontAwesome
             name="picture-o"
             size={18}
-            color={"#25292e"}
+            color={"white"}
             style={styles.buttonIcon}
           />
           <Text style={[styles.buttonLabel, { color: "white" }]}>{label}</Text>
