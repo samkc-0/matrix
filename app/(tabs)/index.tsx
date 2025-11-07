@@ -4,6 +4,8 @@ import { View, StyleSheet } from "react-native";
 
 import ImageViewer from "@/components/ImageViewer";
 import Button from "@/components/Button";
+import IconButton from "@/components/IconButton";
+import CircleButton from "@/components/CircleButton";
 
 const PlaceholderImage = require("@/assets/images/background-image.png");
 
@@ -35,6 +37,19 @@ export default function Index() {
       alert("you gotta choose an image");
     }
   };
+
+  const onReset = () => {
+    setShowAppOptions(false);
+  };
+
+  const onAddSticker = () => {
+    console.log("adding sticker");
+  };
+
+  const onSaveImageAsync = () => {
+    console.log("saving image");
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
