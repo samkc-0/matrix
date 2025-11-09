@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { captureRef } from "react-native-view-shot";
 import * as ImagePicker from "expo-image-picker";
-import { View, StyleSheet, ImageSourcePropType } from "react-native";
+import { Platform, View, StyleSheet, ImageSourcePropType } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as MediaLibrary from "expo-media-library";
+import domtoimage from "dom-to-image";
 
 import ImageViewer from "@/components/ImageViewer";
 import Button from "@/components/Button";
@@ -71,18 +72,35 @@ export default function Index() {
   };
 
   const onSaveImageAsync = async () => {
-    console.log("saving image");
-    try {
-      const localUri = await captureRef(imageRef, {
-        height: 440,
-        quality: 1,
-      });
-      await MediaLibrary.saveToLibraryAsync(localUri);
-      if (localUri) {
-        alert("saved!");
+    if (Platform.OS === "web") {
+      console.log("saving image from web");
+      try {
+        const dataUrl = await domtoimage.toJpeg(imageRef.current, {
+          width: 320,
+          height: 440,
+          quality: 0.95,
+        });
+        const link = document.createElement("a");
+        link.download = "sticker-smash.jpeg";
+        link.href = dataUrl;
+        link.click();
+      } catch (e) {
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
+    } else {
+      try {
+        console.log("save image from mobile");
+        const localUri = await captureRef(imageRef, {
+          height: 440,
+          quality: 1,
+        });
+        await MediaLibrary.saveToLibraryAsync(localUri);
+        if (localUri) {
+          alert("saved!");
+        }
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
 
