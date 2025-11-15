@@ -32,20 +32,30 @@ export default function Grid<T>({ data, renderItem }: Props<T>) {
 }
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    backgroundColor: "royalblue",
+    width: "80%",
+    height: "80%",
+    aspectRatio: 1,
+  },
   row: {
     flexDirection: "row",
+    margin: 0,
+    padding: 0,
   },
   cell: {
+    boxSizing: "border-box",
+    borderColor: "black",
+    borderWidth: 2,
     flex: 1,
     aspectRatio: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#000",
+    gap: 2,
+    margin: 2,
     width: 50,
-    height: 50,
-    fontSize: 32,
+    backgroundColor: "white",
+    borderRadius: 3,
   },
 });
 

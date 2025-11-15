@@ -2,7 +2,9 @@ import Grid from "@/components/grid";
 import Quadrants from "@/components/quadrants";
 import { View, Text, StyleSheet } from "react-native";
 
-const toText = (item: number) => <Text>{item.toString()}</Text>;
+const toText = (item: number) => (
+  <Text style={{ fontSize: 32, color: "black" }}>{item.toString()}</Text>
+);
 
 export default function Index() {
   return (
@@ -39,6 +41,9 @@ export default function Index() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
+    backgroundColor: "tomato",
+    alignItems: "center",
   },
   square: {
     width: "100%",
