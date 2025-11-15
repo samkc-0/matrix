@@ -1,5 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { StyleSheet, View } from "react-native";
+
+import getDataShape from "@/utils/get-data-shape";
 
 type Props<T> = {
   data: T[][];
@@ -18,11 +20,7 @@ export default function Grid<T>({ data, renderItem }: Props<T>) {
         return (
           <View key={`row-${i}`} style={styles.row}>
             {row.map((item: T, j) => {
-              return (
-                <View key={`cell-${i}-${j}`} style={styles.cell}>
-                  {renderItem(item, i, j)}
-                </View>
-              );
+              return renderItem(item, i, j);
             })}
           </View>
         );
@@ -31,9 +29,19 @@ export default function Grid<T>({ data, renderItem }: Props<T>) {
   );
 }
 
+export function Cell({
+  children,
+  style = undefined,
+}: {
+  children: ReactNode;
+  style?: any;
+}) {
+  return <View style={{ ...styles.cell, ...style }}>{children}</View>;
+}
+
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "royalblue",
+    backgroundColor: "black",
     width: "80%",
     height: "80%",
     aspectRatio: 1,
@@ -54,24 +62,7 @@ const styles = StyleSheet.create({
     gap: 2,
     margin: 2,
     width: 50,
-    backgroundColor: "white",
+    backgroundColor: "gold",
     borderRadius: 3,
   },
 });
-
-type DataShapeResult = {
-  rows?: number;
-  cols?: number;
-  isJagged: boolean;
-};
-function getDataShape<T>(data: T[][]): DataShapeResult {
-  const firstRow = data[0];
-  if (data.some((row) => row.length !== firstRow.length)) {
-    return {
-      rows: undefined,
-      cols: undefined,
-      isJagged: true,
-    };
-  }
-  return { rows: data.length, cols: firstRow.length, isJagged: false };
-}
