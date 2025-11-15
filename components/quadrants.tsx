@@ -1,42 +1,49 @@
 import React, { Children, ReactNode } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, useWindowDimensions, StyleSheet } from "react-native";
 
 type Props = {
   children: ReactNode[] | ReactNode;
 };
 
-export function Quadrants({ children }: Props) {
+export default function Quadrants({ children }: Props) {
   if (Children.count(children) !== 4) {
     throw new Error("Quadrants must have 4 children");
   }
   const [topLeft, topRight, bottomLeft, bottomRight] =
     Children.toArray(children);
   return (
-    <View style={styles.quadrants}>
+    <View style={styles.container}>
       <View style={styles.row}>
-        <View style={styles.quadrant}>{topLeft}</View>
-        <View style={styles.quadrant}>{topRight}</View>
+        <View style={styles.box}>{topLeft}</View>
+        <View style={styles.box}>{topRight}</View>
       </View>
       <View style={styles.row}>
-        <View style={styles.quadrant}>{bottomLeft}</View>
-        <View style={styles.quadrant}>{bottomRight}</View>
+        <View style={styles.box}>{bottomLeft}</View>
+        <View style={styles.box}>{bottomRight}</View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  quadrants: {
+  container: {
     flex: 1,
+    flexDirection: "column",
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    aspectRatio: 1,
   },
   row: {
     flex: 1,
     flexDirection: "row",
   },
-  quadrant: {
+  box: {
     flex: 1,
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
+    aspectRatio: 1,
   },
 });

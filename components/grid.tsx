@@ -43,6 +43,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#000",
+    width: 50,
+    height: 50,
+    fontSize: 32,
   },
 });
 
