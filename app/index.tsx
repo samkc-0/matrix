@@ -5,25 +5,52 @@ import { testProblem } from "@/data/test-problem";
 
 import getDataShape from "@/utils/get-data-shape";
 
-const renderCell = (item: number) => {
-  const fontSize = 38 - 6 * item.toString().length;
-  return (
-    <Cell>
-      <Text
-        style={{
-          fontSize,
-          color: "black",
-          fontFamily: "JetBrains Mono, monospace",
-        }}
+type Omission = {
+  label: string;
+  row: number;
+  col: number;
+  keySequence: string[][];
+};
+
+const renderCell = (label: string, omissions: Omission[]) => {
+  omissions = omissions.filter((o) => o.label === label);
+  return (item: number, i: number, j: number) => {
+    let value = item.toString();
+    let isOmission = false;
+    if (omissions.some((o) => o.row === i && o.col === j)) {
+      value = "?".repeat(value.length);
+      isOmission = true;
+    }
+    const fontSize = 38 - 6 * value.length;
+    return (
+      <Cell
+        key={`cell-${i}-${j}`}
+        style={{ backgroundColor: isOmission ? "red" : "gold" }}
       >
-        {item.toString()}
-      </Text>
-    </Cell>
-  );
+        <Text
+          style={{
+            fontSize,
+            color: "black",
+            fontFamily: "JetBrains Mono, monospace",
+          }}
+        >
+          {value}
+        </Text>
+      </Cell>
+    );
+  };
 };
 
 export default function Index() {
   const problem = testProblem;
+  const omissions = problem.omissions.map((o) => {
+    return {
+      label: o.matrix,
+      row: o.row,
+      col: o.col,
+      keySequence: generateKeyPresses(problem[o.matrix], o.row, o.col),
+    };
+  });
   return (
     <View style={styles.container}>
       <Quadrants>
@@ -34,13 +61,13 @@ export default function Index() {
         </Text>
 
         {/* Matrix B (top right) */}
-        <Grid data={problem.b} renderItem={renderCell} />
+        <Grid data={problem.b} renderItem={renderCell("b", omissions)} />
 
         {/* Matrix A (bottom left) */}
-        <Grid data={problem.a} renderItem={renderCell} />
+        <Grid data={problem.a} renderItem={renderCell("a", omissions)} />
 
         {/* Answer Matrix C (bottom right) */}
-        <Grid data={problem.c} renderItem={renderCell} />
+        <Grid data={problem.c} renderItem={renderCell("c", omissions)} />
       </Quadrants>
     </View>
   );
