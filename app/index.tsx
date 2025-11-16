@@ -9,23 +9,22 @@ type Omission = {
   label: string;
   row: number;
   col: number;
-  keySequence: string[][];
+  keySequence: KeySequence;
 };
 
 const renderCell = (label: string, omissions: Omission[]) => {
   omissions = omissions.filter((o) => o.label === label);
   return (item: number, i: number, j: number) => {
     let value = item.toString();
-    let isOmission = false;
-    if (omissions.some((o) => o.row === i && o.col === j)) {
-      value = "?";
-      isOmission = true;
+    const omission = omissions.find((o) => o.row === i && o.col === j);
+    if (omission) {
+      value = omission.keySequence[1].show;
     }
     const fontSize = 38 - 6 * value.length;
     return (
       <Cell
         key={`cell-${i}-${j}`}
-        style={{ backgroundColor: isOmission ? "red" : "gold" }}
+        style={{ backgroundColor: omission ? "red" : "gold" }}
       >
         <Text
           style={{
@@ -87,23 +86,33 @@ const styles = StyleSheet.create({
   },
 });
 
+type KeySequenceState = {
+  expect?: string;
+  show: string;
+};
+type KeySequence = KeySequenceState[];
+
 function generateKeyPresses(
   matrix: number[][],
   row: number,
   col: number,
-): string[][] {
+): KeySequence {
   const { rows, cols, isJagged } = getDataShape(matrix);
+
   if (isJagged) {
     throw new Error("All matrix rows must be the same length");
   }
+
   if (rows === 0 || cols === 0) {
     throw new Error("Matrix is empty");
   }
+
   if (row >= rows) {
     throw new Error(
       `Row index out of bounds: i=${row} for ${rows}x${cols} matrix`,
     );
   }
+
   if (col >= cols) {
     throw new Error(
       `Column index out of bounds: j=${col} for ${rows}x${cols} matrix`,
@@ -112,13 +121,20 @@ function generateKeyPresses(
 
   const targetValue = matrix[row][col];
   const representation = formatNumber(targetValue);
-  const keySequence: string[][] = [];
+  const keySequence: KeySequence = [];
   const blanked = "_".repeat(representation.length);
   representation.split("").forEach((char, i) => {
-    const next = blanked.slice(0, i) + char + blanked.slice(i + 1);
-    keySequence.push([char, next]);
+    if (i == 0) {
+      const state = { show: "?", expect: char };
+      keySequence.push(state);
+    } else {
+      const show = representation.slice(0, i) + blanked.slice(i);
+      const expect = char;
+      keySequence.push({ show, expect });
+    }
   });
-  return keySequence;
+  const filledOutState = { show: representation, expect: undefined };
+  return keySequence.concat(filledOutState);
 }
 
 function formatNumber(n: number): string {
