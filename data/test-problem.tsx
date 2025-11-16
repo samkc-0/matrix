@@ -1,26 +1,26 @@
 export const testProblem = {
   a: [
-    [6, 2, 2],
-    [5, 0, 4],
+    [2, 7, 9],
+    [0, 0, 3],
   ],
   b: [
-    [9, 9, 0],
-    [9, 3, 2],
-    [6, 5, 2],
+    [1, 9, 5],
+    [6, 3, 7],
+    [3, 2, 1],
   ],
   c: [
-    [84, 70, 8],
-    [69, 65, 8],
+    [71, 57, 68],
+    [9, 6, 3],
   ],
   omissions: [
     {
       matrix: "c",
-      row: 0,
+      row: 1,
       col: 2,
     },
     {
-      matrix: "b",
-      row: 2,
+      matrix: "c",
+      row: 0,
       col: 2,
     },
     {
@@ -29,4 +29,6 @@ export const testProblem = {
       col: 0,
     },
   ],
+  valid: true,
+  detail: "ok",
 };

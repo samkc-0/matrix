@@ -18,7 +18,7 @@ const renderCell = (label: string, omissions: Omission[]) => {
     let value = item.toString();
     let isOmission = false;
     if (omissions.some((o) => o.row === i && o.col === j)) {
-      value = "?".repeat(value.length);
+      value = "?";
       isOmission = true;
     }
     const fontSize = 38 - 6 * value.length;
