@@ -11,34 +11,20 @@ type Omission = {
   label: string;
   row: number;
   col: number;
-  keySequence: KeySequence;
 };
 
 const renderCell = (
   label: string,
-  omissions: Omission[],
+  keySequence: KeySequence,
   handleKeyPress: any,
 ) => {
   return (item: number, i: number, j: number) => {
     let value = item.toString();
-    const omission = omissions.find(
-      (o) => o.label === label && o.row === i && o.col === j,
-    );
-    if (omission) {
-      value = omission.keySequence[0].show;
-    }
     const fontSize = 38 - 6 * value.length;
-    let color = "gold";
-    if (omission) {
-      color = "red";
-    }
-    if (
-      label === omissions[0].label &&
-      i == omissions[0].row &&
-      j == omissions[0].col
-    ) {
-      color = "lime";
-    }
+    const ks = keySequence[0];
+    const isTargetCell =
+      ks && ks.label === label && ks.row === i && ks.col === j;
+    const color = isTargetCell ? "lime" : "gold";
     return (
       <Cell key={`cell-${i}-${j}`} style={{ backgroundColor: color }}>
         <Pressable onPress={() => handleKeyPress(value)}>
@@ -49,7 +35,7 @@ const renderCell = (
               fontFamily: "JetBrains Mono, monospace",
             }}
           >
-            {value}
+            {isTargetCell ? ks.show : value}
           </Text>
         </Pressable>
       </Cell>
@@ -59,64 +45,14 @@ const renderCell = (
 
 export default function Index() {
   const problem = testProblem;
-  const [omissions, setOmissions] = useState<Omission[]>(
-    problem.omissions.map((o) => {
-      return {
-        label: o.matrix,
-        row: o.row,
-        col: o.col,
-        keySequence: generateKeyPresses(
-          problem[o.matrix as "a" | "b" | "c"],
-          o.row,
-          o.col,
-        ),
-      };
-    }),
-  );
-
-  const [expectedKey, setExpectedKey] = useState(() => {
-    console.log(omissions);
-    return omissions[0].keySequence[0].expect || ANY_KEY;
-  });
+  const [keySequence, setKeySequence] = useState(generateKeyPresses(problem));
 
   const handleKeyPress = (key: string) => {
-    if (key !== expectedKey) {
-      console.log(`wong key. want ${expectedKey} but got ${key}`);
-      return;
+    if (key === keySequence[0].expectedKey) {
+      setKeySequence(keySequence.slice(1));
     }
-
-    const currentKeySequence = omissions[0].keySequence;
-    const currentOmission = omissions[0];
-
-    // is the problem done?
-    if (currentKeySequence.length === 1 && omissions.length == 1) {
-      console.log("done.");
-      return;
-    }
-
-    // is the cell done?
-    if (currentKeySequence.length === 1) {
-      setOmissions(omissions.slice(1));
-      if (omissions[0].keySequence[0].expect === undefined) {
-        setExpectedKey(ANY_KEY);
-        console.log(omissions);
-        return;
-      }
-      setExpectedKey(omissions[0].keySequence[0].expect || ANY_KEY);
-      return;
-    }
-
-    // otherwise just move to the key key press
-    currentOmission.keySequence = currentKeySequence.slice(1);
-    setOmissions([currentOmission, ...omissions.slice(1)]);
-    if (omissions[0].keySequence[0].expect === undefined) {
-      setExpectedKey(ANY_KEY);
-      return;
-    }
-    setExpectedKey(omissions[0].keySequence[0].expect || ANY_KEY);
   };
 
-  // indices for omissions & key sequences
   return (
     <View style={styles.container}>
       <Quadrants>
@@ -124,24 +60,31 @@ export default function Index() {
           style={{ color: "gold", fontFamily: "JetBrains Mono, monospace" }}
         >
           <Button onPress={() => handleKeyPress(ANY_KEY)} title={ANY_KEY} />
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+            <Button
+              key={`key-${n}`}
+              onPress={() => handleKeyPress(n.toString())}
+              title={n.toString()}
+            />
+          ))}
         </Text>
 
         {/* Matrix B (top right) */}
         <Grid
           data={problem.b}
-          renderItem={renderCell("b", omissions, handleKeyPress)}
+          renderItem={renderCell("b", keySequence, handleKeyPress)}
         />
 
         {/* Matrix A (bottom left) */}
         <Grid
           data={problem.a}
-          renderItem={renderCell("a", omissions, handleKeyPress)}
+          renderItem={renderCell("a", keySequence, handleKeyPress)}
         />
 
         {/* Answer Matrix C (bottom right) */}
         <Grid
           data={problem.c}
-          renderItem={renderCell("c", omissions, handleKeyPress)}
+          renderItem={renderCell("c", keySequence, handleKeyPress)}
         />
       </Quadrants>
     </View>
@@ -163,54 +106,42 @@ const styles = StyleSheet.create({
 });
 
 type KeySequenceState = {
-  expect?: string;
+  expectedKey: string;
+  label: string;
+  row: number;
+  col: number;
   show: string;
+  omissions: Omission[];
 };
+
 type KeySequence = KeySequenceState[];
 
-function generateKeyPresses(
-  matrix: number[][],
-  row: number,
-  col: number,
-): KeySequence {
-  const { rows, cols, isJagged } = getDataShape(matrix);
-
-  if (isJagged) {
-    throw new Error("All matrix rows must be the same length");
-  }
-
-  if (rows === 0 || cols === 0) {
-    throw new Error("Matrix is empty");
-  }
-
-  if (row >= rows) {
-    throw new Error(
-      `Row index out of bounds: i=${row} for ${rows}x${cols} matrix`,
-    );
-  }
-
-  if (col >= cols) {
-    throw new Error(
-      `Column index out of bounds: j=${col} for ${rows}x${cols} matrix`,
-    );
-  }
-
-  const targetValue = matrix[row][col];
-  const representation = formatNumber(targetValue);
+function generateKeyPresses(problem: typeof testProblem): KeySequence {
   const keySequence: KeySequence = [];
-  const blanked = "_".repeat(representation.length);
-  representation.split("").forEach((char, i) => {
-    if (i == 0) {
-      const state = { show: "?", expect: char };
-      keySequence.push(state);
-    } else {
-      const show = representation.slice(0, i) + blanked.slice(i);
-      const expect = char;
-      keySequence.push({ show, expect });
-    }
-  });
-  const filledOutState = { show: representation, expect: undefined };
-  return keySequence.concat(filledOutState);
+  for (const omission of problem.omissions) {
+    const { matrix: label, row, col } = omission;
+    const targetValue = problem[label as "a" | "b" | "c"][row][col];
+    const representation = formatNumber(targetValue);
+    representation.split("").forEach((char, i) => {
+      keySequence.push({
+        expectedKey: char,
+        label,
+        row,
+        col,
+        show: representation.slice(0, i),
+        omissions: problem.omissions
+          .slice(1)
+          .map(({ matrix: label, row, col }) => {
+            return {
+              label,
+              row,
+              col,
+            };
+          }),
+      });
+    });
+  }
+  return keySequence;
 }
 
 function formatNumber(n: number): string {
