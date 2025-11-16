@@ -29,13 +29,12 @@ export default function Grid<T>({ data, renderItem }: Props<T>) {
   );
 }
 
-export function Cell({
-  children,
-  style = undefined,
-}: {
+type CellProps = {
   children: ReactNode;
   style?: any;
-}) {
+};
+
+export function Cell({ children, style = undefined }: CellProps) {
   return <View style={{ ...styles.cell, ...style }}>{children}</View>;
 }
 
