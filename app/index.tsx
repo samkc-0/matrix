@@ -2,7 +2,7 @@ import Grid, { Cell } from "@/components/grid";
 import Quadrants from "@/components/quadrants";
 import { View, Pressable, Text, StyleSheet, Button } from "react-native";
 import { testProblem } from "@/data/test-problem";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import getDataShape from "@/utils/get-data-shape";
 const ANY_KEY = "space";
@@ -18,13 +18,27 @@ const renderCell = (
   keySequence: KeySequence,
   handleKeyPress: any,
 ) => {
-  return (item: number, i: number, j: number) => {
+  return function renderItem(item: number, i: number, j: number) {
     let value = item.toString();
     const fontSize = 38 - 6 * value.length;
+
+    const omission = keySequence.find(
+      (ks) => ks.label === label && ks.row === i && ks.col === j,
+    );
+
     const ks = keySequence[0];
+
+    const hide =
+      (omission && ks !== omission) ||
+      (omission && omission.show.split("").every((c) => c === "_"));
+
     const isTargetCell =
       ks && ks.label === label && ks.row === i && ks.col === j;
     const color = isTargetCell ? "lime" : "gold";
+
+    if (isTargetCell) value = ks.show;
+    else if (hide) value = "?";
+
     return (
       <Cell key={`cell-${i}-${j}`} style={{ backgroundColor: color }}>
         <Pressable onPress={() => handleKeyPress(value)}>
@@ -35,7 +49,7 @@ const renderCell = (
               fontFamily: "JetBrains Mono, monospace",
             }}
           >
-            {isTargetCell ? ks.show : value}
+            {value}
           </Text>
         </Pressable>
       </Cell>
@@ -45,11 +59,19 @@ const renderCell = (
 
 export default function Index() {
   const problem = testProblem;
-  const [keySequence, setKeySequence] = useState(generateKeyPresses(problem));
+  const [keySequence, setKeySequence] = useState<KeySequence>(
+    generateKeyPresses(problem),
+  );
+
+  useEffect(() => {
+    console.log(keySequence[0]);
+  }, [keySequence]);
 
   const handleKeyPress = (key: string) => {
     if (key === keySequence[0].expectedKey) {
-      setKeySequence(keySequence.slice(1));
+      const updatedKeySequence = keySequence.slice(1);
+      console.log(updatedKeySequence[0]);
+      setKeySequence(updatedKeySequence);
     }
   };
 
@@ -111,36 +133,32 @@ type KeySequenceState = {
   row: number;
   col: number;
   show: string;
-  omissions: Omission[];
 };
 
 type KeySequence = KeySequenceState[];
 
 function generateKeyPresses(problem: typeof testProblem): KeySequence {
   const keySequence: KeySequence = [];
+
   for (const omission of problem.omissions) {
     const { matrix: label, row, col } = omission;
     const targetValue = problem[label as "a" | "b" | "c"][row][col];
     const representation = formatNumber(targetValue);
+
     representation.split("").forEach((char, i) => {
+      const revealed =
+        representation.slice(0, i) + "_".repeat(representation.length - i);
+
       keySequence.push({
         expectedKey: char,
         label,
         row,
         col,
-        show: representation.slice(0, i),
-        omissions: problem.omissions
-          .slice(1)
-          .map(({ matrix: label, row, col }) => {
-            return {
-              label,
-              row,
-              col,
-            };
-          }),
+        show: revealed,
       });
     });
   }
+
   return keySequence;
 }
 
