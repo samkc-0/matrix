@@ -87,7 +87,9 @@ export default function Index() {
       };
     }, [keySequence]);
   }
+
   const handleKeyPress = (key: string) => {
+    if (keySequence.length === 0) return;
     if (key === keySequence[0].expectedKey) {
       const updatedKeySequence = keySequence.slice(1);
       console.log(updatedKeySequence[0]);
