@@ -41,13 +41,25 @@ const renderCell = (
 
     const isTargetCell =
       ks && ks.label === label && ks.row === i && ks.col === j;
-    const color = isTargetCell ? "lime" : "gold";
 
     if (isTargetCell) value = ks.show;
     else if (hide) value = "?";
 
+    const isTerm =
+      (label === "a" && ks.row === i) || (label === "b" && ks.col === j);
+    let cellColor = "white";
+    if (isTargetCell) cellColor = "violet";
+    else if (hide) cellColor = "silver";
+    else if (isTerm) cellColor = "violet";
+
     return (
-      <Cell key={`cell-${i}-${j}`} style={{ backgroundColor: color }}>
+      <Cell
+        key={`cell-${i}-${j}`}
+        style={{
+          backgroundColor: cellColor,
+          transition: "background-color 0.5s ease-in-out",
+        }}
+      >
         <Pressable onPress={() => handleKeyPress(value)}>
           <Text
             style={{
