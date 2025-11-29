@@ -1,6 +1,13 @@
 import Grid, { Cell } from "@/components/grid";
 import Quadrants from "@/components/quadrants";
-import { View, Pressable, Text, StyleSheet, Button } from "react-native";
+import {
+  View,
+  Pressable,
+  Text,
+  StyleSheet,
+  Button,
+  Platform,
+} from "react-native";
 import { testProblem } from "@/data/test-problem";
 import { useEffect, useState } from "react";
 
@@ -67,6 +74,19 @@ export default function Index() {
     console.log(keySequence[0]);
   }, [keySequence]);
 
+  if (Platform.OS === "web") {
+    useEffect(() => {
+      document.addEventListener("keypress", (e) => {
+        handleKeyPress(e.key);
+      });
+
+      return () => {
+        document.removeEventListener("keypress", (e) => {
+          handleKeyPress(e.key);
+        });
+      };
+    }, [keySequence]);
+  }
   const handleKeyPress = (key: string) => {
     if (key === keySequence[0].expectedKey) {
       const updatedKeySequence = keySequence.slice(1);
