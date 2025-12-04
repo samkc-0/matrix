@@ -1,17 +1,11 @@
 import Grid, { Cell } from "@/components/grid";
 import Quadrants from "@/components/quadrants";
-import {
-  View,
-  Pressable,
-  Text,
-  StyleSheet,
-  Button,
-  Platform,
-} from "react-native";
+import { View, Pressable, Text, StyleSheet, Platform } from "react-native";
 import { testProblem } from "@/data/test-problem";
 import { useEffect, useState } from "react";
 
-import getDataShape from "@/utils/get-data-shape";
+import GestureCanvas from "@/components/gesture-canvas";
+
 const ANY_KEY = "space";
 
 type Omission = {
@@ -105,24 +99,36 @@ export default function Index() {
     if (key === keySequence[0].expectedKey) {
       const updatedKeySequence = keySequence.slice(1);
       console.log(updatedKeySequence[0]);
-      setKeySequence(updatedKeySequence);
+      setKeySequence(() => updatedKeySequence);
     }
+  };
+
+  const deriveEquation = ({ label, row, col }: any) => {
+    let aTerms = problem.a[row];
+    let bTerms = problem.b.map((row) => row[col]);
+
+    let pairs = [];
+
+    for (let i = 0; i < aTerms.length; i++) {
+      const aTerm = aTerms[i];
+      const bTerm = bTerms[i];
+      pairs.push(`${aTerm} x ${bTerm}`);
+    }
+
+    return pairs.join(" + ") + " =";
+  };
+
+  const handleHandwriting = (points: { x: number; y: number; t: number }[]) => {
+    console.log(points);
   };
 
   return (
     <View style={styles.container}>
       <Quadrants>
         <Text
-          style={{ color: "gold", fontFamily: "JetBrains Mono, monospace" }}
+          style={{ color: "white", fontFamily: "JetBrains Mono, monospace" }}
         >
-          <Button onPress={() => handleKeyPress(ANY_KEY)} title={ANY_KEY} />
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
-            <Button
-              key={`key-${n}`}
-              onPress={() => handleKeyPress(n.toString())}
-              title={n.toString()}
-            />
-          ))}
+          {deriveEquation(keySequence[0])}
         </Text>
 
         {/* Matrix B (top right) */}
@@ -143,6 +149,7 @@ export default function Index() {
           renderItem={renderCell("c", keySequence, handleKeyPress)}
         />
       </Quadrants>
+      <GestureCanvas onStrokeEnd={handleHandwriting} />
     </View>
   );
 }
