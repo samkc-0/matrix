@@ -14,19 +14,13 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import GestureCanvas from "@/components/gesture-canvas";
 import { recognizeGesture } from "@/utils/recognize-gesture";
 
-const ANY_KEY = "space";
-
 type Omission = {
   label: string;
   row: number;
   col: number;
 };
 
-const renderCell = (
-  label: string,
-  keySequence: KeySequence,
-  handleKeyPress: any,
-) => {
+const renderCell = (label: string, keySequence: KeySequence) => {
   return function renderItem(item: number, i: number, j: number) {
     let value = item.toString();
     const fontSize = 38 - 6 * value.length;
@@ -57,6 +51,7 @@ const renderCell = (
 
     const shouldAnimate = isTerm || isTargetCell;
     const anim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
       Animated.loop(
         Animated.timing(anim, {
@@ -67,15 +62,16 @@ const renderCell = (
       ).start();
 
       if (shouldAnimate) {
-        const offset = (isRowTerm ? j : i) / 3;
-        console.log(offset);
+        const offset = (isRowTerm ? i : j) / 3;
         anim.setValue(offset);
       }
     }, []);
+
     const animatedColor = anim.interpolate({
       inputRange: [0, 0.5, 1],
-      outputRange: ["violet", "lime", "violet"],
+      outputRange: ["violet", "violet", "violet"],
     });
+
     return (
       <Cell
         key={`cell-${i}-${j}`}
@@ -83,17 +79,15 @@ const renderCell = (
           backgroundColor: shouldAnimate ? animatedColor : staticColor,
         }}
       >
-        <Pressable onPress={() => handleKeyPress(value)}>
-          <Text
-            style={{
-              fontSize,
-              color: "black",
-              fontFamily: "JetBrains Mono, monospace",
-            }}
-          >
-            {value}
-          </Text>
-        </Pressable>
+        <Text
+          style={{
+            fontSize,
+            color: "black",
+            fontFamily: "JetBrains Mono, monospace",
+          }}
+        >
+          {value}
+        </Text>
       </Cell>
     );
   };
@@ -153,17 +147,11 @@ export default function Index() {
     console.log(value);
     handleKeyPress(value);
   };
-  const renderA = useCallback(renderCell("a", keySequence, handleKeyPress), [
-    keySequence,
-  ]);
 
-  const renderB = useCallback(renderCell("b", keySequence, handleKeyPress), [
-    keySequence,
-  ]);
+  const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
+  const renderB = useCallback(renderCell("b", keySequence), [keySequence]);
+  const renderC = useCallback(renderCell("c", keySequence), [keySequence]);
 
-  const renderC = useCallback(renderCell("c", keySequence, handleKeyPress), [
-    keySequence,
-  ]);
   return (
     <View style={styles.container}>
       <Quadrants>
