@@ -1,8 +1,15 @@
 import Grid, { Cell } from "@/components/grid";
 import Quadrants from "@/components/quadrants";
-import { View, Pressable, Text, StyleSheet, Platform } from "react-native";
+import {
+  Animated,
+  View,
+  Pressable,
+  Text,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { testProblem } from "@/data/test-problem";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import GestureCanvas from "@/components/gesture-canvas";
 import { recognizeGesture } from "@/utils/recognize-gesture";
@@ -30,7 +37,7 @@ const renderCell = (
 
     const ks = keySequence[0];
 
-    const hide =
+    const hidden =
       (omission && ks !== omission) ||
       (omission && omission.show.split("").every((c) => c === "_"));
 
@@ -38,21 +45,42 @@ const renderCell = (
       ks && ks.label === label && ks.row === i && ks.col === j;
 
     if (isTargetCell) value = ks.show;
-    else if (hide) value = "?";
+    else if (hidden) value = "?";
 
-    const isTerm =
-      (label === "a" && ks.row === i) || (label === "b" && ks.col === j);
-    let cellColor = "white";
-    if (isTargetCell) cellColor = "violet";
-    else if (hide) cellColor = "silver";
-    else if (isTerm) cellColor = "violet";
+    const isRowTerm = label === "a" && ks.row === i;
+    const isColTerm = label === "b" && ks.col === j;
+    const isTerm = isRowTerm || isColTerm;
 
+    let staticColor = "white";
+    if (hidden) staticColor = "silver";
+    if (isTerm || isTargetCell) staticColor = "violet";
+
+    const shouldAnimate = isTerm || isTargetCell;
+    const anim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+      Animated.loop(
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ).start();
+
+      if (shouldAnimate) {
+        const offset = (isRowTerm ? j : i) / 3;
+        console.log(offset);
+        anim.setValue(offset);
+      }
+    }, []);
+    const animatedColor = anim.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: ["violet", "lime", "violet"],
+    });
     return (
       <Cell
         key={`cell-${i}-${j}`}
         style={{
-          backgroundColor: cellColor,
-          transition: "background-color 0.5s ease-in-out",
+          backgroundColor: shouldAnimate ? animatedColor : staticColor,
         }}
       >
         <Pressable onPress={() => handleKeyPress(value)}>
@@ -125,7 +153,17 @@ export default function Index() {
     console.log(value);
     handleKeyPress(value);
   };
+  const renderA = useCallback(renderCell("a", keySequence, handleKeyPress), [
+    keySequence,
+  ]);
 
+  const renderB = useCallback(renderCell("b", keySequence, handleKeyPress), [
+    keySequence,
+  ]);
+
+  const renderC = useCallback(renderCell("c", keySequence, handleKeyPress), [
+    keySequence,
+  ]);
   return (
     <View style={styles.container}>
       <Quadrants>
@@ -136,22 +174,13 @@ export default function Index() {
         </Text>
 
         {/* Matrix B (top right) */}
-        <Grid
-          data={problem.b}
-          renderItem={renderCell("b", keySequence, handleKeyPress)}
-        />
+        <Grid data={problem.b} renderItem={renderB} />
 
         {/* Matrix A (bottom left) */}
-        <Grid
-          data={problem.a}
-          renderItem={renderCell("a", keySequence, handleKeyPress)}
-        />
+        <Grid data={problem.a} renderItem={renderA} />
 
         {/* Answer Matrix C (bottom right) */}
-        <Grid
-          data={problem.c}
-          renderItem={renderCell("c", keySequence, handleKeyPress)}
-        />
+        <Grid data={problem.c} renderItem={renderC} />
       </Quadrants>
       <GestureCanvas onStrokeEnd={handleHandwriting} />
     </View>

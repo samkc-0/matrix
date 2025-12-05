@@ -1,6 +1,5 @@
 import { ReactNode, useState } from "react";
-import { StyleSheet, View } from "react-native";
-
+import { Animated, StyleSheet, View } from "react-native";
 import getDataShape from "@/utils/get-data-shape";
 
 type Props<T> = {
@@ -35,7 +34,11 @@ type CellProps = {
 };
 
 export function Cell({ children, style = undefined }: CellProps) {
-  return <View style={{ ...styles.cell, ...style }}>{children}</View>;
+  return (
+    <Animated.View style={{ ...styles.cell, ...style }}>
+      {children}
+    </Animated.View>
+  );
 }
 
 const styles = StyleSheet.create({
