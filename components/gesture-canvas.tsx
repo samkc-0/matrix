@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import { View, PanResponder, StyleSheet } from "react-native";
 import Svg, { Polyline } from "react-native-svg";
 
-type PointInTime = { x: number; y: number; t: number };
-type PointsHandler = (points: PointInTime[]) => void;
+export type PointInTime = { x: number; y: number; t: number };
+export type PointsHandler = (points: PointInTime[]) => void;
 
 export default function GestureCanvas({
   onStrokeEnd,
@@ -86,4 +86,3 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
-

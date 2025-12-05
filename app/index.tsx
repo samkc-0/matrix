@@ -5,6 +5,7 @@ import { testProblem } from "@/data/test-problem";
 import { useEffect, useState } from "react";
 
 import GestureCanvas from "@/components/gesture-canvas";
+import { recognizeGesture } from "@/utils/recognize-gesture";
 
 const ANY_KEY = "space";
 
@@ -120,6 +121,9 @@ export default function Index() {
 
   const handleHandwriting = (points: { x: number; y: number; t: number }[]) => {
     console.log(points);
+    const value = recognizeGesture(points);
+    console.log(value);
+    handleKeyPress(value);
   };
 
   return (
