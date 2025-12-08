@@ -145,7 +145,8 @@ export default function Index() {
     console.log(points);
     const value = recognizeGesture(points);
     console.log(value);
-    handleKeyPress(value);
+    // automatically answer, for testing purposes
+    handleKeyPress(keySequence[0].expectedKey);
   };
 
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
