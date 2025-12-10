@@ -143,8 +143,10 @@ export default function Index() {
 
   const handleHandwriting = (points: { x: number; y: number; t: number }[]) => {
     console.log(points);
+
     const value = recognizeGesture(points);
     console.log(value);
+
     // automatically answer, for testing purposes
     handleKeyPress(keySequence[0].expectedKey);
   };
