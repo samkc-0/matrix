@@ -135,7 +135,7 @@ export default function Index() {
     for (let i = 0; i < aTerms.length; i++) {
       const aTerm = aTerms[i];
       const bTerm = bTerms[i];
-      pairs.push(`${aTerm} x ${bTerm}`);
+      pairs.push(`${aTerm} × ${bTerm}`);
     }
 
     return pairs.join(" + ") + " =";
