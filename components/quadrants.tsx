@@ -1,9 +1,5 @@
 import React, { Children, ReactNode, useCallback, useState } from "react";
-import {
-  LayoutChangeEvent,
-  StyleSheet,
-  View,
-} from "react-native";
+import { LayoutChangeEvent, StyleSheet, View } from "react-native";
 
 type Props = {
   children: ReactNode[] | ReactNode;
@@ -63,8 +59,8 @@ const styles = StyleSheet.create({
   },
   fallbackSize: {
     width: "100%",
-    maxWidth: "100%",
-    maxHeight: "100%",
+    maxWidth: "100vw",
+    maxHeight: "100vh",
   },
   row: {
     flex: 1,
