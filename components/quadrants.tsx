@@ -21,9 +21,14 @@ export default function Quadrants({ children }: Props) {
   const safeWidth = width || fallbackWindow.width;
   const safeHeight = height || fallbackWindow.height;
   const squareSize = Math.max(1, Math.min(safeWidth, safeHeight));
+  if (width == null || height == null) {
+    return null;
+  }
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.container, { width: squareSize, height: squareSize }]}>
+      <View
+        style={[styles.container, { width: squareSize, height: squareSize }]}
+      >
         <View style={styles.row}>
           <View style={styles.box}>{topLeft}</View>
           <View style={styles.box}>{topRight}</View>
