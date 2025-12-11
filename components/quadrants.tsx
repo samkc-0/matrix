@@ -1,6 +1,7 @@
 import React, { Children, ReactNode } from "react";
 import {
   Dimensions,
+  Platform,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -18,20 +19,19 @@ export default function Quadrants({ children }: Props) {
     Children.toArray(children);
   const { width, height } = useWindowDimensions();
   const fallbackWindow = Dimensions.get("window");
-  const safeWidth = width || fallbackWindow.width;
-  const safeHeight = height || fallbackWindow.height;
+  const safeWidth = width || fallbackWindow.width || 0;
+  const safeHeight = height || fallbackWindow.height || 0;
+  const haveDimensions = safeWidth > 1 && safeHeight > 1;
   const squareSize = Math.max(1, Math.min(safeWidth, safeHeight));
-  if (width == null || height == null) {
+  if (!haveDimensions && Platform.OS !== "web") {
     return null;
   }
+  const squareStyle = haveDimensions
+    ? { width: squareSize, height: squareSize }
+    : WEB_FALLBACK_SQUARE;
   return (
     <View style={styles.wrapper}>
-      <View
-        style={[
-          styles.container,
-          { width: "min(100vw, 100vh)", height: "min(100vw, 100vh)" },
-        ]}
-      >
+      <View style={[styles.container, squareStyle]}>
         <View style={styles.row}>
           <View style={styles.box}>{topLeft}</View>
           <View style={styles.box}>{topRight}</View>
@@ -72,3 +72,8 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
   },
 });
+
+const WEB_FALLBACK_SQUARE = {
+  width: "min(100vw, 100vh)",
+  height: "min(100vw, 100vh)",
+};
