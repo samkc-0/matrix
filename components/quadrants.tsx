@@ -12,9 +12,17 @@ export default function Quadrants({ children }: Props) {
   const [topLeft, topRight, bottomLeft, bottomRight] =
     Children.toArray(children);
   const { width, height } = useWindowDimensions();
-  const size = Math.min(width, height);
+  const squareSize =
+    width > 0 && height > 0 ? Math.min(width, height) : undefined;
   return (
-    <View style={{ width: size, height: size, ...styles.container }}>
+    <View
+      style={[
+        styles.container,
+        squareSize
+          ? { width: squareSize, height: squareSize }
+          : styles.fallbackSize,
+      ]}
+    >
       <View style={styles.row}>
         <View style={styles.box}>{topLeft}</View>
         <View style={styles.box}>{topRight}</View>
@@ -29,14 +37,15 @@ export default function Quadrants({ children }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    width: "100%",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     aspectRatio: 1,
     borderColor: "black",
     borderWidth: 2,
+  },
+  fallbackSize: {
+    width: "100%",
   },
   row: {
     flex: 1,
