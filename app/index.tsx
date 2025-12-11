@@ -145,7 +145,7 @@ export default function Index() {
     console.log(points);
 
     const value = recognizeGesture(points);
-    console.log(value);
+    console.log("recognized: ", value);
 
     // automatically answer, for testing purposes
     handleKeyPress(keySequence[0].expectedKey);
