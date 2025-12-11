@@ -39,7 +39,7 @@ const renderCell = (label: string, keySequence: KeySequence) => {
       ks && ks.label === label && ks.row === i && ks.col === j;
 
     if (isTargetCell) value = ks.show;
-    else if (hidden) value = "?";
+    else if (hidden) value = "";
 
     const isRowTerm = label === "a" && ks.row === i;
     const isColTerm = label === "b" && ks.col === j;
