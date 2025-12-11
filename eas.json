@@ -1,0 +1,14 @@
+{
+  "cli": {
+    "requireCommit": true
+  },
+  "deploy": {
+    "preview": {
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_BASE_URL": "/@samkc-0/matrix"
+      }
+    }
+  }
+}
+
