@@ -135,7 +135,7 @@ export default function Index() {
     for (let i = 0; i < aTerms.length; i++) {
       const aTerm = aTerms[i];
       const bTerm = bTerms[i];
-      pairs.push(`${aTerm} × ${bTerm}`);
+      pairs.push(`${aTerm}×${bTerm}`);
     }
 
     return pairs.join(" + ") + " =";
@@ -202,7 +202,10 @@ type KeySequenceState = {
 
 type KeySequence = KeySequenceState[];
 
-function generateKeyPresses(problem: typeof testProblem): KeySequence {
+function generateKeyPresses(
+  problem: typeof testProblem,
+  blankChar = "",
+): KeySequence {
   const keySequence: KeySequence = [];
 
   for (const omission of problem.omissions) {
@@ -212,7 +215,8 @@ function generateKeyPresses(problem: typeof testProblem): KeySequence {
 
     representation.split("").forEach((char, i) => {
       const revealed =
-        representation.slice(0, i) + "_".repeat(representation.length - i);
+        representation.slice(0, i) +
+        blankChar.repeat(representation.length - i);
 
       keySequence.push({
         expectedKey: char,
