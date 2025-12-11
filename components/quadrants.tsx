@@ -1,5 +1,9 @@
-import React, { Children, ReactNode } from "react";
-import { View, useWindowDimensions, StyleSheet } from "react-native";
+import React, { Children, ReactNode, useCallback, useState } from "react";
+import {
+  LayoutChangeEvent,
+  StyleSheet,
+  View,
+} from "react-native";
 
 type Props = {
   children: ReactNode[] | ReactNode;
@@ -11,31 +15,44 @@ export default function Quadrants({ children }: Props) {
   }
   const [topLeft, topRight, bottomLeft, bottomRight] =
     Children.toArray(children);
-  const { width, height } = useWindowDimensions();
-  const squareSize =
-    width > 0 && height > 0 ? Math.min(width, height) : undefined;
+  const [squareSize, setSquareSize] = useState<number>();
+
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    const nextSize = Math.min(width, height);
+    if (!Number.isFinite(nextSize) || nextSize <= 0) return;
+    setSquareSize(nextSize);
+  }, []);
   return (
-    <View
-      style={[
-        styles.container,
-        squareSize
-          ? { width: squareSize, height: squareSize }
-          : styles.fallbackSize,
-      ]}
-    >
-      <View style={styles.row}>
-        <View style={styles.box}>{topLeft}</View>
-        <View style={styles.box}>{topRight}</View>
-      </View>
-      <View style={styles.row}>
-        <View style={styles.box}>{bottomLeft}</View>
-        <View style={styles.box}>{bottomRight}</View>
+    <View style={styles.wrapper} onLayout={handleLayout}>
+      <View
+        style={[
+          styles.container,
+          squareSize
+            ? { width: squareSize, height: squareSize }
+            : styles.fallbackSize,
+        ]}
+      >
+        <View style={styles.row}>
+          <View style={styles.box}>{topLeft}</View>
+          <View style={styles.box}>{topRight}</View>
+        </View>
+        <View style={styles.row}>
+          <View style={styles.box}>{bottomLeft}</View>
+          <View style={styles.box}>{bottomRight}</View>
+        </View>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
     flexDirection: "column",
     justifyContent: "center",
@@ -46,6 +63,8 @@ const styles = StyleSheet.create({
   },
   fallbackSize: {
     width: "100%",
+    maxWidth: "100%",
+    maxHeight: "100%",
   },
   row: {
     flex: 1,
