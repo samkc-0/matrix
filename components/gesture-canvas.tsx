@@ -61,7 +61,7 @@ export default function GestureCanvas({
         <Polyline
           points={renderPoints.map((p) => `${p.x},${p.y}`).join(" ")}
           fill="none"
-          stroke="white"
+          stroke="#06aed5"
           strokeWidth={6}
           strokeLinecap="round"
           strokeLinejoin="round"
