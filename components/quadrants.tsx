@@ -27,7 +27,10 @@ export default function Quadrants({ children }: Props) {
   return (
     <View style={styles.wrapper}>
       <View
-        style={[styles.container, { width: squareSize, height: squareSize }]}
+        style={[
+          styles.container,
+          { width: "min(100vw, 100vh)", height: "min(100vw, 100vh)" },
+        ]}
       >
         <View style={styles.row}>
           <View style={styles.box}>{topLeft}</View>
