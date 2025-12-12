@@ -1,21 +1,7 @@
+import type { PointInTime } from "@/components/gesture-canvas";
 import * as tf from "@tensorflow/tfjs";
 import "@tensorflow/tfjs-react-native";
-import { bundleResourceIO } from "@tensorflow/tfjs-react-native";
-
-import type { PointInTime } from "@/components/gesture-canvas";
-
-import modelJson from "@/assets/models/mnist/model.json";
-import modelWeights from "@/assets/models/mnist/group1-shard1of1.bin";
-
-let mnistModel: tf.LayersModel | null = null;
-
-export async function loadMnistModel() {
-  await tf.ready();
-  mnistModel = await tf.loadLayersModel(
-    bundleResourceIO(modelJson, modelWeights),
-  );
-  console.log("MNIST model loaded");
-}
+import { Platform } from "react-native";
 
 function normalizePoints(points: PointInTime[]): PointInTime[] {
   const target = 20;
@@ -26,33 +12,14 @@ function normalizePoints(points: PointInTime[]): PointInTime[] {
   const top = Math.min(...points.map((p) => p.y));
   const bottom = Math.max(...points.map((p) => p.y));
 
+  const w = Math.max(1, right - left);
+  const h = Math.max(1, bottom - top);
+
   return points.map((p) => ({
-    x: ((p.x - left) / (right - left)) * target + pad,
-    y: ((p.y - top) / (bottom - top)) * target + pad,
+    x: ((p.x - left) / w) * target + pad,
+    y: ((p.y - top) / h) * target + pad,
     t: p.t,
   }));
-}
-
-export function recognizeGesture(points: PointInTime[]): string {
-  if (!mnistModel) {
-    throw new Error("MNIST model not loaded");
-  }
-  const norm = normalizePoints(points);
-  const image = Array.from({ length: 28 }, (_, i) => Array(28).fill(0));
-
-  for (let i = 1; i < norm.length; i++) {
-    const start = norm[i - 1];
-    const end = norm[i];
-    rasterizeLine(image, start, end);
-  }
-
-  const flat = image.flat();
-  const input = tf.tensor(flat, [1, 28, 28, 1]).toFloat().div(255);
-
-  const prediction = mnistModel.predict(input) as tf.Tensor;
-  const digit = prediction.argMax(-1).dataSync()[0];
-
-  return String(digit);
 }
 
 function rasterizeLine(grid: number[][], p1: PointInTime, p2: PointInTime) {
@@ -84,4 +51,50 @@ function rasterizeLine(grid: number[][], p1: PointInTime, p2: PointInTime) {
       y0 += sy;
     }
   }
+}
+
+let mnistModel: tf.LayersModel | null = null;
+
+export async function loadMnistModel() {
+  await tf.ready();
+
+  if (Platform.OS === "web") {
+    // Web: usa un modelo hospedado o uno dentro de /public
+    mnistModel = await tf.loadLayersModel("@/assets/models/mnist/model.json");
+    return;
+  } else {
+    // Native: backend + bundleResourceIO
+    await tf.setBackend("rn");
+    await tf.ready();
+
+    const { bundleResourceIO } = require("@tensorflow/tfjs-react-native");
+    const modelJson = require("../assets/models/mnist/model.json");
+    const modelWeights = require("../assets/models/mnist/group1-shard1of1.bin");
+
+    mnistModel = await tf.loadLayersModel(
+      bundleResourceIO(modelJson, modelWeights),
+    );
+  }
+}
+
+export function recognizeGesture(points: PointInTime[]): string {
+  if (!mnistModel) {
+    throw new Error("MNIST model not loaded");
+  }
+  const norm = normalizePoints(points);
+  const image = Array.from({ length: 28 }, (_, i) => Array(28).fill(0));
+
+  for (let i = 1; i < norm.length; i++) {
+    const start = norm[i - 1];
+    const end = norm[i];
+    rasterizeLine(image, start, end);
+  }
+
+  const flat = image.flat();
+  const input = tf.tensor(flat, [1, 28, 28, 1]).toFloat().div(255);
+
+  const prediction = mnistModel.predict(input) as tf.Tensor;
+  const digit = prediction.argMax(-1).dataSync()[0];
+
+  return String(digit);
 }

@@ -12,7 +12,7 @@ import { testProblem } from "@/data/test-problem";
 import { useEffect, useState, useRef, useCallback } from "react";
 
 import GestureCanvas from "@/components/gesture-canvas";
-import { recognizeGesture } from "@/utils/recognize-gesture";
+import { loadMnistModel, recognizeGesture } from "@/utils/recognize-gesture";
 
 type Omission = {
   label: string;
@@ -98,7 +98,11 @@ export default function Index() {
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
   );
-
+  useEffect(() => {
+    const load = async () => {
+      await loadMnistModel();
+    };
+  }, []);
   useEffect(() => {
     console.log(keySequence[0]);
   }, [keySequence]);
