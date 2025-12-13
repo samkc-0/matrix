@@ -1,6 +1,5 @@
 import type { PointInTime } from "@/components/gesture-canvas";
 import * as tf from "@tensorflow/tfjs";
-import "@tensorflow/tfjs-react-native";
 import { Platform } from "react-native";
 
 function normalizePoints(points: PointInTime[]): PointInTime[] {
@@ -62,19 +61,19 @@ export async function loadMnistModel() {
     // Web: usa un modelo hospedado o uno dentro de /public
     mnistModel = await tf.loadLayersModel("@/assets/models/mnist/model.json");
     return;
-  } else {
-    // Native: backend + bundleResourceIO
-    await tf.setBackend("rn");
-    await tf.ready();
-
-    const { bundleResourceIO } = require("@tensorflow/tfjs-react-native");
-    const modelJson = require("../assets/models/mnist/model.json");
-    const modelWeights = require("../assets/models/mnist/group1-shard1of1.bin");
-
-    mnistModel = await tf.loadLayersModel(
-      bundleResourceIO(modelJson, modelWeights),
-    );
   }
+  // Native: backend + bundleResourceIO
+  const tfRN = await import("@tensorflow/tfjs-react-native");
+  await tfRN.setBackend("rn");
+  await tf.ready();
+
+  const { bundleResourceIO } = tfRN;
+  const modelJson = require("../assets/models/mnist/model.json");
+  const modelWeights = require("../assets/models/mnist/group1-shard1of1.bin");
+
+  mnistModel = await tf.loadLayersModel(
+    bundleResourceIO(modelJson, modelWeights),
+  );
 }
 
 export function recognizeGesture(points: PointInTime[]): string {
