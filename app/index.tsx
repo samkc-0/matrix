@@ -98,11 +98,15 @@ export default function Index() {
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
   );
+  const [modelLoaded, setModelLoaded] = useState(false);
   useEffect(() => {
-    const load = async () => {
+    const loadModel = async () => {
       await loadMnistModel();
     };
+    loadModel();
+    setModelLoaded(true);
   }, []);
+
   useEffect(() => {
     console.log(keySequence[0]);
   }, [keySequence]);
@@ -158,6 +162,10 @@ export default function Index() {
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
   const renderB = useCallback(renderCell("b", keySequence), [keySequence]);
   const renderC = useCallback(renderCell("c", keySequence), [keySequence]);
+
+  if (!modelLoaded) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>

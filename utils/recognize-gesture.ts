@@ -56,10 +56,15 @@ let mnistModel: tf.LayersModel | null = null;
 
 export async function loadMnistModel() {
   await tf.ready();
-
+  console.log("doing fetch test");
+  fetch("/models/mnist/group1-shard1of1.bin")
+    .then((r) => r.arrayBuffer())
+    .then((b) => console.log(b.byteLength % 4));
   if (Platform.OS === "web") {
     // Web: usa un modelo hospedado o uno dentro de /public
-    mnistModel = await tf.loadLayersModel("@/assets/models/mnist/model.json");
+    const modelUrl = `${window.location.origin}/models/mnist/model.json`;
+    console.log("modelUrl:", modelUrl);
+    mnistModel = await tf.loadLayersModel(modelUrl);
     return;
   }
   // Native: backend + bundleResourceIO
