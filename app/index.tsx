@@ -130,7 +130,7 @@ export default function Index() {
     }
   };
 
-  const deriveEquation = ({ label, row, col }: any) => {
+  const formatEquation = ({ label, row, col }: any) => {
     let aTerms = problem.a[row];
     let bTerms = problem.b.map((row) => row[col]);
 
@@ -165,7 +165,7 @@ export default function Index() {
         <Text
           style={{ color: "white", fontFamily: "JetBrains Mono, monospace" }}
         >
-          {deriveEquation(keySequence[0])}
+          {formatEquation(keySequence[0])}
         </Text>
 
         {/* Matrix B (top right) */}
