@@ -1,19 +1,20 @@
 import Grid, { Cell } from "@/components/grid";
 import Quadrants from "@/components/quadrants";
-import {
-  Animated,
-  View,
-  Pressable,
-  Text,
-  StyleSheet,
-  Platform,
-} from "react-native";
+import { Animated, View, Text, StyleSheet, Platform } from "react-native";
 import { testProblem } from "@/data/test-problem";
 import { useEffect, useState, useRef, useCallback } from "react";
+
+import { PointInTime } from "@/components/gesture-canvas";
 
 import GestureCanvas from "@/components/gesture-canvas";
 
 import useDigitClassifier from "@/utils/recognize-gesture";
+
+import {
+  initClassifier,
+  classifyDigitSimple,
+  isClassifierReady,
+} from "@/utils/digit-classifier";
 
 type Omission = {
   label: string;
@@ -100,17 +101,15 @@ export default function Index() {
     generateKeyPresses(problem),
   );
   const [modelLoaded, setModelLoaded] = useState(false);
-  useEffect(() => {
-    const loadModel = async () => {
-      await loadMnistModel();
-    };
-    loadModel();
-    setModelLoaded(true);
-  }, []);
+
+  const [prediction, setPrediction] = useState<{
+    digit: number;
+    confidence: number;
+  } | null>(null);
 
   useEffect(() => {
-    console.log(keySequence[0]);
-  }, [keySequence]);
+    initClassifier().then(() => setModelLoaded(true));
+  }, []);
 
   if (Platform.OS === "web") {
     useEffect(() => {
@@ -150,14 +149,17 @@ export default function Index() {
     return pairs.join(" + ") + " =";
   };
 
-  const handleHandwriting = (points: { x: number; y: number; t: number }[]) => {
-    console.log(points);
+  const handleStrokeEnd = async (points: PointInTime[]) => {
+    if (!isClassifierReady() || points.length < 5) return;
 
-    const value = recognizeGesture(points);
-    console.log("recognized: ", value);
-
-    // automatically answer, for testing purposes
-    handleKeyPress(keySequence[0].expectedKey);
+    try {
+      const result = await classifyDigitSimple(
+        points.map((p) => ({ x: p.x, y: p.y })),
+      );
+      setPrediction(result);
+    } catch (error) {
+      console.error("Classification error:", error);
+    }
   };
 
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
@@ -186,7 +188,7 @@ export default function Index() {
         {/* Answer Matrix C (bottom right) */}
         <Grid data={problem.c} renderItem={renderC} />
       </Quadrants>
-      <GestureCanvas onStrokeEnd={handleHandwriting} />
+      <GestureCanvas onStrokeEnd={handleStrokeEnd} />
     </View>
   );
 }
