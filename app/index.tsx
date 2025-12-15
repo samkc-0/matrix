@@ -8,13 +8,7 @@ import { PointInTime } from "@/components/gesture-canvas";
 
 import GestureCanvas from "@/components/gesture-canvas";
 
-import useDigitClassifier from "@/utils/recognize-gesture";
-
-import {
-  initClassifier,
-  classifyDigitSimple,
-  isClassifierReady,
-} from "@/utils/digit-classifier";
+import useDigitClassifier from "@/utils/use-digit-classifier";
 
 type Omission = {
   label: string;
