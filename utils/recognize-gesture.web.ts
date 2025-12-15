@@ -7,7 +7,7 @@ import rasterizeLine from "@/utils/rasterize-line";
 
 type Status = "loading" | "ready" | "error";
 
-export default function useDigitClassifier() {
+export function useDigitClassifier() {
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<Error | null>(null);

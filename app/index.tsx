@@ -12,7 +12,8 @@ import { testProblem } from "@/data/test-problem";
 import { useEffect, useState, useRef, useCallback } from "react";
 
 import GestureCanvas from "@/components/gesture-canvas";
-import { loadMnistModel, recognizeGesture } from "@/utils/recognize-gesture";
+
+import useDigitClassifier from "@/utils/recognize-gesture";
 
 type Omission = {
   label: string;
