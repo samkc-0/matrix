@@ -2,15 +2,14 @@ import React, { useRef, useState } from "react";
 import { View, PanResponder, StyleSheet } from "react-native";
 import Svg, { Polyline } from "react-native-svg";
 
-export type PointInTime = { x: number; y: number; t: number };
-export type PointsHandler = (points: PointInTime[]) => void;
+import { PointInTime, PointsHandler } from "@/types/point-in-time";
 
 export default function GestureCanvas({
   onStrokeEnd,
 }: {
   onStrokeEnd: PointsHandler;
 }) {
-  const pointsRef = useRef<{ x: number; y: number; t: number }[]>([]);
+  const pointsRef = useRef<PointInTime[]>([]);
   const [renderPoints, setRenderPoints] = useState<{ x: number; y: number }[]>(
     [],
   );
