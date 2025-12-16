@@ -42,6 +42,9 @@ export default function useDigitClassifier() {
       }
       const gestureAsTensor = preprocessGesture(input);
       const prediction = model.predict(gestureAsTensor) as tf.Tensor;
+
+      console.log(prediction);
+
       const digit = prediction.argMax(-1).dataSync()[0];
 
       prediction.dispose();

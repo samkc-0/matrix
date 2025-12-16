@@ -38,5 +38,5 @@ model.fit(
 )
 
 # Export to TFJS
-tfjs.converters.save_keras_model(model, "public")
-print("✅ Model exported to public/")
+tfjs.converters.save_keras_model(model, "model")
+print("✅ Model exported to model/")
