@@ -25,27 +25,28 @@ export default function Index() {
 
   const digitClassifier = useDigitClassifier();
 
-  const handleKeyPress = (key: string) => {
-    if (keySequence.length === 0) return;
-    if (key === keySequence[0].expectedKey) {
-      const updatedKeySequence = keySequence.slice(1);
-      console.log(updatedKeySequence[0]);
-      setKeySequence(() => updatedKeySequence);
-    }
-  };
+  const handleKeyPress = useCallback((key: string) => {
+    console.log("detected key press:", key);
+    console.log("want:", keySequence[0].expectedKey);
+    setKeySequence((prev) => {
+      if (prev.length === 0) return prev;
+      if (prev[0].expectedKey === key) {
+        return prev.slice(1);
+      }
+      return prev;
+    });
+  }, []);
 
-  if (Platform.OS === "web") {
-    useEffect(() => {
-      document.addEventListener("keydown", (e) => {
-        handleKeyPress(e.key);
-      });
-      return () => {
-        document.removeEventListener("keydown", (e) => {
-          handleKeyPress(e.key);
-        });
-      };
-    }, [keySequence]);
-  }
+  useEffect(() => {
+    if (Platform.OS !== "web") return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      handleKeyPress(e.key);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [handleKeyPress]);
 
   const formatEquation = ({ row, col }: Required<KeySequence[number]>) => {
     let aTerms = problem.a[row];
@@ -68,6 +69,7 @@ export default function Index() {
     if (digitClassifier.modelLoaded) {
       const digit = digitClassifier.classify(points);
       console.log(digit);
+      handleKeyPress(String(digit));
     }
   };
 

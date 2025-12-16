@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import * as tf from "@tensorflow/tfjs";
+import "@tensorflow/tfjs-backend-webgl";
 import "@tensorflow/tfjs-react-native";
+import * as tf from "@tensorflow/tfjs";
 import { bundleResourceIO } from "@tensorflow/tfjs-react-native";
 
 import type PointInTime from "@/types/point-in-time";
@@ -18,6 +19,7 @@ export function useDigitClassifier() {
     async function load() {
       try {
         await tf.ready();
+        await tf.setBackend("webgl");
         const modelJson = require("@/assets/models/mnist/model.json");
         const modelWeights = require("@/assets/models/mnist/group1-shard1of1.bin");
         const loaded = await tf.loadLayersModel(
@@ -45,12 +47,18 @@ export function useDigitClassifier() {
       if (!model) {
         throw new Error("Model not loaded");
       }
-      const gestureAsTensor = preprocessGesture(input);
-      const prediction = model.predict(gestureAsTensor) as tf.Tensor;
-      const digit = prediction.argMax(-1).dataSync()[0];
 
-      prediction.dispose();
-      return String(digit);
+      return tf.tidy(() => {
+        const gestureAsTensor = preprocessGesture(input);
+        const prediction = model.predict(gestureAsTensor) as tf.Tensor;
+        const digitTensor = prediction.argMax(-1);
+        const digit = digitTensor.dataSync()[0];
+
+        gestureAsTensor.dispose();
+        prediction.dispose();
+
+        return String(digit);
+      });
     },
     [model],
   );
