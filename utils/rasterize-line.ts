@@ -1,57 +1,24 @@
 import type { PointInTime } from "@/types/point-in-time";
 
-function rasterizeLine(grid: number[][], p1: PointInTime, p2: PointInTime) {
-  let x0 = Math.round(p1.x);
-  let y0 = Math.round(p1.y);
-  let x1 = Math.round(p2.x);
-  let y1 = Math.round(p2.y);
-
-  const dx = Math.abs(x1 - x0);
-  const dy = Math.abs(y1 - y0);
-  const sx = x0 < x1 ? 1 : -1;
-  const sy = y0 < y1 ? 1 : -1;
-  let err = dx - dy;
-
-  while (true) {
-    if (x0 >= 0 && x0 < 28 && y0 >= 0 && y0 < 28) {
-      grid[y0][x0] = 255; // stroke pixel
-    }
-
-    if (x0 === x1 && y0 === y1) break;
-
-    const e2 = 2 * err;
-    if (e2 > -dy) {
-      err -= dy;
-      x0 += sx;
-    }
-    if (e2 < dx) {
-      err += dx;
-      y0 += sy;
-    }
-  }
-}
-
 /**
  * Draw a line with thickness using Xiaolin Wu's algorithm variant
  */
 function drawLineWithThickness(
   image: Float32Array,
   size: number,
-  x0: number,
-  y0: number,
-  x1: number,
-  y1: number,
+  start: PointInTime,
+  end: PointInTime,
   thickness: number,
 ): void {
-  const dx = x1 - x0;
-  const dy = y1 - y0;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
   const dist = Math.sqrt(dx * dx + dy * dy);
   const steps = Math.max(Math.ceil(dist * 2), 1);
 
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    const x = x0 + dx * t;
-    const y = y0 + dy * t;
+    const x = start.x + dx * t;
+    const y = start.y + dy * t;
 
     // Draw a soft circle at each point
     const radius = thickness;
@@ -76,4 +43,13 @@ function drawLineWithThickness(
   }
 }
 
-export default drawLineWithThickness;
+function drawStroke(
+  image: Float32Array,
+  size: number,
+  start: PointInTime,
+  end: PointInTime,
+) {
+  drawLineWithThickness(image, size, start, end, 1.5);
+}
+
+export default drawStroke;
