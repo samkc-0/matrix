@@ -49,7 +49,7 @@ function drawStroke(
   start: PointInTime,
   end: PointInTime,
 ) {
-  drawLineWithThickness(image, size, start, end, 1.5);
+  drawLineWithThickness(image, size, start, end, 0.8);
 }
 
 export default drawStroke;
