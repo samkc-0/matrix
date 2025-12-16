@@ -9,7 +9,7 @@ import preprocessGesture from "./preprocess-gesture";
 
 type Status = "loading" | "ready" | "error";
 
-export function useDigitClassifier() {
+export default function useDigitClassifier() {
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<Error | null>(null);

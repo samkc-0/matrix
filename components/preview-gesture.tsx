@@ -46,8 +46,8 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
       style={{
         border: "1px solid #ccc",
         imageRendering: "pixelated", // 🔥 clave para MNIST-style
-        width: "10%",
-        height: "10%",
+        width: "10vw",
+        height: "10vw",
         position: "fixed",
         top: 0,
         left: 0,

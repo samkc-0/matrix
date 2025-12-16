@@ -84,6 +84,18 @@ export default function Index() {
     return <Text>Loading...(model status: {digitClassifier.status})</Text>;
   }
 
+  if (keySequence.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text
+          style={{ color: "white", fontFamily: "JetBrains Mono, monospace" }}
+        >
+          All done!
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Quadrants>
