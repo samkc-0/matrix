@@ -43,13 +43,4 @@ function drawLineWithThickness(
   }
 }
 
-function drawStroke(
-  image: Float32Array,
-  size: number,
-  start: PointInTime,
-  end: PointInTime,
-) {
-  drawLineWithThickness(image, size, start, end, 0.8);
-}
-
-export default drawStroke;
+export default drawLineWithThickness;

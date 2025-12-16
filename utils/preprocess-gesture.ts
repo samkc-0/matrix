@@ -3,6 +3,8 @@ import normalizePoints from "@/utils/normalize-points";
 import type { PointInTime } from "@/types/point-in-time";
 import * as tf from "@tensorflow/tfjs";
 
+const STROKE_THICKNESS = 0.8;
+
 export default function preprocessGesture(points: PointInTime[]): tf.Tensor {
   const norm = normalizePoints(points);
   const image = new Float32Array(28 * 28);
@@ -10,7 +12,7 @@ export default function preprocessGesture(points: PointInTime[]): tf.Tensor {
   for (let i = 1; i < norm.length; i++) {
     const start = norm[i - 1];
     const end = norm[i];
-    rasterizeLine(image, 28, start, end);
+    rasterizeLine(image, 28, start, end, STROKE_THICKNESS);
   }
   const centered = centerImage(image, 28);
   return tf.tensor(centered, [1, 28, 28, 1]).toFloat();
