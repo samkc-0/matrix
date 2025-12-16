@@ -10,12 +10,17 @@ import Quadrants from "@/components/quadrants";
 import renderCell from "@/utils/render-cell";
 import GestureCanvas from "@/components/gesture-canvas";
 import useDigitClassifier from "@/utils/use-digit-classifier";
+import GesturePreview from "@/components/preview-gesture";
 
 export default function Index() {
   const problem = testProblem;
 
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
+  );
+
+  const [previewGesture, setPreviewGesture] = useState<PointInTime[] | null>(
+    null,
   );
 
   const digitClassifier = useDigitClassifier();
@@ -42,7 +47,7 @@ export default function Index() {
     }, [keySequence]);
   }
 
-  const formatEquation = ({ label, row, col }: any) => {
+  const formatEquation = ({ row, col }: Required<KeySequence[number]>) => {
     let aTerms = problem.a[row];
     let bTerms = problem.b.map((row) => row[col]);
 
@@ -58,9 +63,8 @@ export default function Index() {
   };
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
-    // TODO: rasterize thick lines with the good algo
-    // also make a train.sh script that trains and copies the weights
-    // also might want to add synthetic data for - and .
+    // TODO: might want to add synthetic data for - and .
+    setPreviewGesture(points);
     if (digitClassifier.modelLoaded) {
       const digit = digitClassifier.classify(points);
       console.log(digit);
@@ -97,6 +101,7 @@ export default function Index() {
         <Grid data={problem.c} renderItem={renderC} />
       </Quadrants>
       <GestureCanvas onStrokeEnd={handleStrokeEnd} />
+      {previewGesture && <GesturePreview gesture={previewGesture} />}
     </View>
   );
 }

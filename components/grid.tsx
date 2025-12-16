@@ -4,7 +4,7 @@ import getDataShape from "@/utils/get-data-shape";
 
 type Props<T> = {
   data: T[][];
-  renderItem: (item: T, i?: number, j?: number) => ReactNode;
+  renderItem: Function;
 };
 
 export default function Grid<T>({ data, renderItem }: Props<T>) {
