@@ -45,6 +45,9 @@ export default function Index() {
   };
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
+    // TODO: rasterize thick lines with the good algo
+    // also make a train.sh script that trains and copies the weights
+    // also might want to add synthetic data for - and .
     if (digitClassifier.modelLoaded) {
       const digit = digitClassifier.classify(points);
       console.log(digit);
