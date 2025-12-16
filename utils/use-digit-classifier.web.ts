@@ -1,13 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import * as tf from "@tensorflow/tfjs";
 
-import type { PointInTime } from "@/components/gesture-canvas";
+import type PointInTime from "@/types/point-in-time";
 import normalizePoints from "@/utils/normalize-points";
 import rasterizeLine from "@/utils/rasterize-line";
 
 type Status = "loading" | "ready" | "error";
 
-export function useDigitClassifier() {
+export default function useDigitClassifier() {
   const [model, setModel] = useState<tf.LayersModel | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [error, setError] = useState<Error | null>(null);
@@ -51,7 +51,8 @@ export function useDigitClassifier() {
   );
   return { classify, status, error, modelLoaded: status === "ready" };
 }
-`
+
+/*
 export async function loadMnistModel() {
   await tf.ready();
   console.log("doing fetch test");
@@ -101,8 +102,8 @@ export function recognizeGesture(points: PointInTime[]): string {
   return String(digit);
 }
 
-`
 
+*/
 
 function preprocessGesture(points: PointInTime[]): tf.Tensor {
   const norm = normalizePoints(points);
@@ -117,4 +118,3 @@ function preprocessGesture(points: PointInTime[]): tf.Tensor {
   const flat = image.flat();
   return tf.tensor(flat, [1, 28, 28, 1]).toFloat().div(255);
 }
-

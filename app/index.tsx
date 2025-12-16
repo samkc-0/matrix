@@ -1,42 +1,24 @@
-import Grid from "@/components/grid";
-import Quadrants from "@/components/quadrants";
 import { View, Text, StyleSheet, Platform } from "react-native";
-import { testProblem } from "@/data/test-problem";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 import type PointInTime from "@/types/point-in-time";
 import type KeySequence from "@/types/key-sequence";
 
+import { testProblem } from "@/data/test-problem";
+import Grid from "@/components/grid";
+import Quadrants from "@/components/quadrants";
+import renderCell from "@/utils/render-cell";
 import GestureCanvas from "@/components/gesture-canvas";
 import useDigitClassifier from "@/utils/use-digit-classifier";
 
 export default function Index() {
   const problem = testProblem;
+
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
   );
-  const [modelLoaded, setModelLoaded] = useState(false);
 
-  const [prediction, setPrediction] = useState<{
-    digit: number;
-    confidence: number;
-  } | null>(null);
-
-  useEffect(() => {}, []);
-
-  if (Platform.OS === "web") {
-    useEffect(() => {
-      document.addEventListener("keypress", (e) => {
-        handleKeyPress(e.key);
-      });
-
-      return () => {
-        document.removeEventListener("keypress", (e) => {
-          handleKeyPress(e.key);
-        });
-      };
-    }, [keySequence]);
-  }
+  const digitClassifier = useDigitClassifier();
 
   const handleKeyPress = (key: string) => {
     if (keySequence.length === 0) return;
@@ -63,24 +45,18 @@ export default function Index() {
   };
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
-    if (!isClassifierReady() || points.length < 5) return;
-
-    try {
-      const result = await classifyDigitSimple(
-        points.map((p) => ({ x: p.x, y: p.y })),
-      );
-      setPrediction(result);
-    } catch (error) {
-      console.error("Classification error:", error);
-    }
+    if (digitClassifier.modelLoaded) digitClassifier.classify(points);
   };
 
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
   const renderB = useCallback(renderCell("b", keySequence), [keySequence]);
   const renderC = useCallback(renderCell("c", keySequence), [keySequence]);
 
-  if (!modelLoaded) {
-    return <Text>Loading...</Text>;
+  if (digitClassifier.error) {
+    return <Text>Error: {digitClassifier.error.message}</Text>;
+  }
+  if (!digitClassifier.modelLoaded) {
+    return <Text>Loading...(model status: {digitClassifier.status})</Text>;
   }
 
   return (
