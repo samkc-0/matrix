@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
-import { useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import type PointInTime from "@/types/point-in-time";
 import type KeySequence from "@/types/key-sequence";
@@ -28,6 +28,19 @@ export default function Index() {
       setKeySequence(() => updatedKeySequence);
     }
   };
+
+  if (Platform.OS === "web") {
+    useEffect(() => {
+      document.addEventListener("keydown", (e) => {
+        handleKeyPress(e.key);
+      });
+      return () => {
+        document.removeEventListener("keydown", (e) => {
+          handleKeyPress(e.key);
+        });
+      };
+    }, [keySequence]);
+  }
 
   const formatEquation = ({ label, row, col }: any) => {
     let aTerms = problem.a[row];
