@@ -45,7 +45,10 @@ export default function Index() {
   };
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
-    if (digitClassifier.modelLoaded) digitClassifier.classify(points);
+    if (digitClassifier.modelLoaded) {
+      const digit = digitClassifier.classify(points);
+      console.log(digit);
+    }
   };
 
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);
