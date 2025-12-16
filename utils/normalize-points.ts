@@ -1,4 +1,4 @@
-import { PointInTime } from "@/components/gesture-canvas";
+import { PointInTime } from "@/types/point-in-time";
 
 export default function normalizePoints(points: PointInTime[]): PointInTime[] {
   const target = 20;
@@ -11,10 +11,11 @@ export default function normalizePoints(points: PointInTime[]): PointInTime[] {
 
   const w = Math.max(1, right - left);
   const h = Math.max(1, bottom - top);
+  const size = Math.max(w, h);
 
   return points.map((p) => ({
-    x: ((p.x - left) / w) * target + pad,
-    y: ((p.y - top) / h) * target + pad,
+    x: ((p.x - left) / size) * target + pad,
+    y: ((p.y - top) / size) * target + pad,
     t: p.t,
   }));
 }
