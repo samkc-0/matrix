@@ -19,7 +19,7 @@ export default function useDigitClassifier() {
     async function load() {
       try {
         await tf.ready();
-        await tf.setBackend("webgl");
+        await tf.setBackend("rn-webgl");
         const modelJson = require("@/assets/models/mnist/model.json");
         const modelWeights = require("@/assets/models/mnist/group1-shard1of1.bin");
         const loaded = await tf.loadLayersModel(
