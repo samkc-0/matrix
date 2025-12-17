@@ -17,7 +17,6 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
     if (!canvas) return;
 
     const draw = async () => {
-      // ⚠️ react-native-canvas needs explicit size
       const size = 28;
       canvas.width = size;
       canvas.height = size;
@@ -31,18 +30,17 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
       const flat = tensor.reshape([height, width]);
       const data = await flat.data();
 
-      const imageData = ctx.createImageData(width, height);
+      const buffer = new Uint8ClampedArray(width * height);
 
       for (let i = 0; i < data.length; i++) {
         const v = Math.min(255, Math.floor(data[i] * 255));
-        const j = i * 4;
-
-        imageData.data[j + 0] = v;
-        imageData.data[j + 1] = v;
-        imageData.data[j + 2] = v;
-        imageData.data[j + 3] = 255;
+        buffer[i * 4 + 0] = v;
+        buffer[i * 4 + 1] = v;
+        buffer[i * 4 + 2] = v;
+        buffer[i * 4 + 3] = 255;
       }
 
+      const imageData = new ImageData(buffer, width, height);
       ctx.putImageData(imageData, 0, 0);
 
       flat.dispose();
@@ -70,8 +68,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
   },
   canvas: {
-    width: 140,   // upscale for MNIST-style preview
+    width: 140, // upscale for MNIST-style preview
     height: 140,
   },
 });
-
