@@ -4,9 +4,6 @@ import "@tensorflow/tfjs-react-native";
 import * as tf from "@tensorflow/tfjs";
 import { bundleResourceIO } from "@tensorflow/tfjs-react-native";
 
-import type PointInTime from "@/types/point-in-time";
-import preprocessGesture from "./preprocess-gesture";
-
 type Status = "loading" | "ready" | "error";
 
 export default function useDigitClassifier() {
@@ -43,13 +40,12 @@ export default function useDigitClassifier() {
     };
   }, []);
   const classify = useCallback(
-    (input: PointInTime[]) => {
+    (gestureAsTensor: tf.Tensor) => {
       if (!model) {
         throw new Error("Model not loaded");
       }
 
       return tf.tidy(() => {
-        const gestureAsTensor = preprocessGesture(input);
         const prediction = model.predict(gestureAsTensor) as tf.Tensor;
         const digitTensor = prediction.argMax(-1);
         const digit = digitTensor.dataSync()[0];
