@@ -15,18 +15,48 @@ export const testProblem = {
   omissions: [
     {
       matrix: "c",
+      row: 0,
+      col: 0,
+    },
+    {
+      matrix: "c",
+      row: 0,
+      col: 1,
+    },
+    {
+      matrix: "c",
+      row: 0,
+      col: 2,
+    },
+    {
+      matrix: "c",
+      row: 1,
+      col: 0,
+    },
+    {
+      matrix: "c",
+      row: 1,
+      col: 1,
+    },
+    {
+      matrix: "c",
       row: 1,
       col: 2,
     },
     {
       matrix: "c",
-      row: 0,
-      col: 2,
+      row: 2,
+      col: 0,
     },
     {
       matrix: "c",
-      row: 0,
-      col: 0,
+      row: 2,
+      col: 1,
+    },
+    {
+      matrix: "c",
+      row: 2,
+      col: 2,
     },
   ],
   valid: true,

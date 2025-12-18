@@ -1,70 +1,69 @@
-import { useEffect, useRef } from "react";
-import { StyleSheet, View } from "react-native";
-import Canvas from "react-native-canvas";
+import { Canvas, Image, Skia } from "@shopify/react-native-skia";
+import * as tf from "@tensorflow/tfjs";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
+
+const SIZE = 28;
+const SCALE = 10;
 
 type PreviewGestureProps = {
   tensor: tf.Tensor;
 };
 
 export default function PreviewGesture({ tensor }: PreviewGestureProps) {
-  const canvasRef = useRef<Canvas | null>(null);
+  const [image, setImage] = useState<any>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    let mounted = true;
 
-    const draw = async () => {
-      const size = 28;
-      canvas.width = size;
-      canvas.height = size;
+    (async () => {
+      // tensor shape: [1, 28, 28, 1]
+      const data = await tensor.data(); // Float32Array, length 784
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      const pixels = new Uint8Array(SIZE * SIZE * 4);
 
-      const [, height, width] = tensor.shape;
+      for (let i = 0; i < SIZE * SIZE; i++) {
+        const v = Math.max(0, Math.min(1, data[i])) * 255;
 
-      const flat = tensor.reshape([height, width]);
-      const data = await flat.data();
-
-      const buffer = new Uint8ClampedArray(width * height);
-
-      for (let i = 0; i < data.length; i++) {
-        const v = Math.min(255, Math.floor(data[i] * 255));
-        buffer[i * 4 + 0] = v;
-        buffer[i * 4 + 1] = v;
-        buffer[i * 4 + 2] = v;
-        buffer[i * 4 + 3] = 255;
+        pixels[i * 4 + 0] = v; // R
+        pixels[i * 4 + 1] = v; // G
+        pixels[i * 4 + 2] = v; // B
+        pixels[i * 4 + 3] = 255; // A
       }
 
-      const imageData = new ImageData(buffer, width, height);
-      ctx.putImageData(imageData, 0, 0);
+      const img = Skia.Image.MakeImageFromPixels(
+        {
+          width: SIZE,
+          height: SIZE,
+          colorType: Skia.ColorType.RGBA_8888,
+          alphaType: Skia.AlphaType.Opaque,
+        },
+        pixels,
+        SIZE * 4,
+      );
 
-      flat.dispose();
-      tensor.dispose();
+      if (mounted) setImage(img);
+    })();
+
+    return () => {
+      mounted = false;
     };
-
-    draw();
   }, [tensor]);
 
+  if (!image) return null;
+
   return (
-    <View style={styles.container}>
-      <Canvas ref={canvasRef} style={styles.canvas} />
+    <View>
+      <Canvas style={{ width: SIZE * SCALE, height: SIZE * SCALE }}>
+        <Image
+          image={image}
+          x={0}
+          y={0}
+          width={SIZE * SCALE}
+          height={SIZE * SCALE}
+          fit="fill" // nearest-like when integer scaling
+        />
+      </Canvas>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    position: "absolute", // RN replacement for "fixed"
-    top: 0,
-    left: 0,
-    padding: 4,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-  canvas: {
-    width: 140, // upscale for MNIST-style preview
-    height: 140,
-  },
-});
