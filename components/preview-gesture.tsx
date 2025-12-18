@@ -1,19 +1,16 @@
 import { useEffect, useRef } from "react";
-import preprocessGesture from "@/utils/preprocess-gesture";
-import type { Tensor } from "@tensorflow/tfjs";
-import type PointInTime from "@/types/point-in-time";
+import * as tf from "@tensorflow/tfjs";
 
 type PreviewGestureProps = {
-  gesture: PointInTime[];
+  tensor: tf.Tensor;
 };
 
-export default function PreviewGesture({ gesture }: PreviewGestureProps) {
+export default function PreviewGesture({ tensor }: PreviewGestureProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
     const ctx = canvas.getContext("2d")!;
-    const tensor = preprocessGesture(gesture);
 
     // [1, 28, 28, 1]
     const [, height, width] = tensor.shape;
@@ -38,7 +35,7 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
 
     flat.dispose();
     tensor.dispose();
-  }, [gesture]);
+  }, [tensor]);
 
   return (
     <canvas

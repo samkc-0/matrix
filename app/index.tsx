@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Platform } from "react-native";
 import { useEffect, useState, useCallback } from "react";
+import * as tf from "@tensorflow/tfjs";
 
 import type PointInTime from "@/types/point-in-time";
 import type KeySequence from "@/types/key-sequence";
@@ -11,6 +12,7 @@ import renderCell from "@/utils/render-cell";
 import GestureCanvas from "@/components/gesture-canvas";
 import useDigitClassifier from "@/utils/use-digit-classifier";
 import GesturePreview from "@/components/preview-gesture";
+import preprocessGesture from "@/utils/preprocess-gesture";
 
 export default function Index() {
   const problem = testProblem;
@@ -19,9 +21,7 @@ export default function Index() {
     generateKeyPresses(problem),
   );
 
-  const [previewGesture, setPreviewGesture] = useState<PointInTime[] | null>(
-    null,
-  );
+  const [previewGesture, setPreviewGesture] = useState<tf.Tensor | null>(null);
 
   const digitClassifier = useDigitClassifier();
 
@@ -65,9 +65,10 @@ export default function Index() {
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
     // TODO: might want to add synthetic data for - and .
-    setPreviewGesture(points);
+    const gestureAsTensor = await preprocessGesture(points);
+    setPreviewGesture(gestureAsTensor);
     if (digitClassifier.modelLoaded) {
-      const digit = digitClassifier.classify(points);
+      const digit = digitClassifier.classify(gestureAsTensor);
       console.log(digit);
       handleKeyPress(String(digit));
     }
@@ -115,7 +116,7 @@ export default function Index() {
         <Grid data={problem.c} renderItem={renderC} />
       </Quadrants>
       <GestureCanvas onStrokeEnd={handleStrokeEnd} />
-      {previewGesture && <GesturePreview gesture={previewGesture} />}
+      {previewGesture && <GesturePreview tensor={previewGesture} />}
     </View>
   );
 }

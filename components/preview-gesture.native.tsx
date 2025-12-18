@@ -2,14 +2,11 @@ import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import Canvas from "react-native-canvas";
 
-import preprocessGesture from "@/utils/preprocess-gesture";
-import type PointInTime from "@/types/point-in-time";
-
 type PreviewGestureProps = {
-  gesture: PointInTime[];
+  tensor: tf.Tensor;
 };
 
-export default function PreviewGesture({ gesture }: PreviewGestureProps) {
+export default function PreviewGesture({ tensor }: PreviewGestureProps) {
   const canvasRef = useRef<Canvas | null>(null);
 
   useEffect(() => {
@@ -24,7 +21,6 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const tensor = preprocessGesture(gesture);
       const [, height, width] = tensor.shape;
 
       const flat = tensor.reshape([height, width]);
@@ -48,7 +44,7 @@ export default function PreviewGesture({ gesture }: PreviewGestureProps) {
     };
 
     draw();
-  }, [gesture]);
+  }, [tensor]);
 
   return (
     <View style={styles.container}>
