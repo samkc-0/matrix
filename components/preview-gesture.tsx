@@ -34,7 +34,6 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     ctx.putImageData(imageData, 0, 0);
 
     flat.dispose();
-    tensor.dispose();
   }, [tensor]);
 
   return (

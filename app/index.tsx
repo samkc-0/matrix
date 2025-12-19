@@ -66,7 +66,10 @@ export default function Index() {
   const handleStrokeEnd = async (points: PointInTime[]) => {
     // TODO: might want to add synthetic data for - and .
     const gestureAsTensor = preprocessGesture(points);
-    setPreviewGesture(gestureAsTensor);
+    setPreviewGesture((prev) => {
+      prev?.dispose();
+      return gestureAsTensor.clone();
+    });
     if (digitClassifier.modelLoaded) {
       const digit = digitClassifier.classify(gestureAsTensor);
       console.log(digit);
