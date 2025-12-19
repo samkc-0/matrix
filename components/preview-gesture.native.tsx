@@ -1,10 +1,16 @@
-import { Canvas, Image, Skia } from "@shopify/react-native-skia";
+import {
+  AlphaType,
+  Canvas,
+  ColorType,
+  Image,
+  Skia,
+} from "@shopify/react-native-skia";
 import * as tf from "@tensorflow/tfjs";
 import { useEffect, useState } from "react";
-import { View } from "react-native";
+import { View, StyleSheet } from "react-native";
 
 const SIZE = 28;
-const SCALE = 10;
+const SCALE = 2;
 
 type PreviewGestureProps = {
   tensor: tf.Tensor;
@@ -31,14 +37,14 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
         pixels[i * 4 + 3] = 255; // A
       }
 
-      const img = Skia.Image.MakeImageFromPixels(
+      const img = Skia.Image.MakeImage(
         {
           width: SIZE,
           height: SIZE,
-          colorType: Skia.ColorType.RGBA_8888,
-          alphaType: Skia.AlphaType.Opaque,
+          colorType: ColorType.RGBA_8888,
+          alphaType: AlphaType.Opaque,
         },
-        pixels,
+        Skia.Data.fromBytes(pixels),
         SIZE * 4,
       );
 
@@ -53,7 +59,7 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
   if (!image) return null;
 
   return (
-    <View>
+    <View style={styles.container}>
       <Canvas style={{ width: SIZE * SCALE, height: SIZE * SCALE }}>
         <Image
           image={image}
@@ -67,3 +73,13 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    borderColor: "white",
+    borderWidth: 2,
+  },
+});
