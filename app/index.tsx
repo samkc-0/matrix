@@ -65,13 +65,14 @@ export default function Index() {
 
   const handleStrokeEnd = async (points: PointInTime[]) => {
     // TODO: might want to add synthetic data for - and .
-    const gestureAsTensor = await preprocessGesture(points);
+    const gestureAsTensor = preprocessGesture(points);
     setPreviewGesture(gestureAsTensor);
     if (digitClassifier.modelLoaded) {
       const digit = digitClassifier.classify(gestureAsTensor);
       console.log(digit);
       handleKeyPress(String(digit));
     }
+    gestureAsTensor.dispose();
   };
 
   const renderA = useCallback(renderCell("a", keySequence), [keySequence]);

@@ -50,9 +50,7 @@ export default function useDigitClassifier() {
         const digitTensor = prediction.argMax(-1);
         const digit = digitTensor.dataSync()[0];
 
-        gestureAsTensor.dispose();
         prediction.dispose();
-
         return String(digit);
       });
     },

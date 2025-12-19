@@ -43,21 +43,6 @@ export const testProblem = {
       row: 1,
       col: 2,
     },
-    {
-      matrix: "c",
-      row: 2,
-      col: 0,
-    },
-    {
-      matrix: "c",
-      row: 2,
-      col: 1,
-    },
-    {
-      matrix: "c",
-      row: 2,
-      col: 2,
-    },
   ],
   valid: true,
   detail: "ok",
