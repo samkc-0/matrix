@@ -25,15 +25,19 @@ export default function renderCell(
     const isTargetCell =
       ks && ks.label === label && ks.row === i && ks.col === j;
 
+    let textColor = "black";
     if (isTargetCell) value = ks.show;
     else if (hidden) value = "";
+
+    if (isTargetCell && ks.show.length < item.toString().length)
+      textColor = "purple";
 
     const isRowTerm = label === "a" && ks.row === i;
     const isColTerm = label === "b" && ks.col === j;
     const isTerm = isRowTerm || isColTerm;
 
     let staticColor = "white";
-    if (hidden) staticColor = "silver";
+    if (hidden) staticColor = "white";
     if (isTerm || isTargetCell) staticColor = "violet";
 
     const shouldAnimate = isTerm || isTargetCell;
@@ -69,7 +73,7 @@ export default function renderCell(
         <Text
           style={{
             fontSize,
-            color: "black",
+            color: textColor,
             fontFamily: "JetBrains Mono, monospace",
           }}
         >
@@ -79,4 +83,3 @@ export default function renderCell(
     );
   };
 }
-
