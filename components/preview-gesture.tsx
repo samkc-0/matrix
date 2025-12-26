@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as tf from "@tensorflow/tfjs";
 
 type PreviewGestureProps = {
@@ -7,6 +7,8 @@ type PreviewGestureProps = {
 
 export default function PreviewGesture({ tensor }: PreviewGestureProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -37,6 +39,21 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     flat.dispose();
   }, [tensor]);
 
+  useEffect(() => {
+    // Kick off a quick fade-out each time a new tensor arrives.
+    setVisible(true);
+    if (fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+    }
+    fadeTimeoutRef.current = setTimeout(() => setVisible(false), 250);
+
+    return () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, [tensor]);
+
   return (
     <canvas
       ref={canvasRef}
@@ -48,6 +65,8 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
         top: 0,
         left: 0,
         backgroundColor: "white",
+        opacity: visible ? 1 : 0,
+        transition: "opacity 150ms ease-out",
       }}
     />
   );
