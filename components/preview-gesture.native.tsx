@@ -29,7 +29,8 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
       const pixels = new Uint8Array(SIZE * SIZE * 4);
 
       for (let i = 0; i < SIZE * SIZE; i++) {
-        const v = Math.max(0, Math.min(1, data[i])) * 255;
+        const clamped = Math.max(0, Math.min(1, data[i])) * 255;
+        const v = 255 - clamped; // invert so strokes become black on white
 
         pixels[i * 4 + 0] = v; // R
         pixels[i * 4 + 1] = v; // G

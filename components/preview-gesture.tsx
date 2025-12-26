@@ -24,7 +24,8 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     const imageData = ctx.createImageData(width, height);
 
     for (let i = 0; i < width * height; i++) {
-      const v = Math.min(255, Math.floor(data[i] * 255));
+      const clamped = Math.min(255, Math.floor(data[i] * 255));
+      const v = 255 - clamped; // invert so ink is black on white
       imageData.data[i * 4 + 0] = v;
       imageData.data[i * 4 + 1] = v;
       imageData.data[i * 4 + 2] = v;
