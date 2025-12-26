@@ -6,8 +6,8 @@ import {
   Skia,
 } from "@shopify/react-native-skia";
 import * as tf from "@tensorflow/tfjs";
-import { useEffect, useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, StyleSheet } from "react-native";
 
 const SIZE = 28;
 const SCALE = 2;
@@ -18,6 +18,8 @@ type PreviewGestureProps = {
 
 export default function PreviewGesture({ tensor }: PreviewGestureProps) {
   const [image, setImage] = useState<any>(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     let mounted = true;
@@ -57,10 +59,39 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     };
   }, [tensor]);
 
+  useEffect(() => {
+    if (!image) return;
+
+    fadeAnim.stopAnimation();
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 150,
+      useNativeDriver: true,
+    }).start();
+
+    if (fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+    }
+
+    fadeTimeoutRef.current = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }, 250);
+
+    return () => {
+      if (fadeTimeoutRef.current) {
+        clearTimeout(fadeTimeoutRef.current);
+      }
+    };
+  }, [image, fadeAnim]);
+
   if (!image) return null;
 
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
       <Canvas style={{ width: SIZE * SCALE, height: SIZE * SCALE }}>
         <Image
           image={image}
@@ -71,7 +102,7 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
           fit="fill" // nearest-like when integer scaling
         />
       </Canvas>
-    </View>
+    </Animated.View>
   );
 }
 

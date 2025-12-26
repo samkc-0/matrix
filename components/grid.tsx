@@ -54,6 +54,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   cell: {
+    boxSizing: "border-box",
     borderColor: "black",
     borderWidth: 2,
     flex: 1,
