@@ -105,7 +105,7 @@ export default function Matmul() {
     <View style={styles.container}>
       <Quadrants>
         <Text
-          style={{ color: "white", fontFamily: "JetBrains Mono, monospace" }}
+          style={{ color: "black", fontFamily: "JetBrains Mono, monospace" }}
         >
           {formatEquation(keySequence[0])}
         </Text>
