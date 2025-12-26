@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import {
-  Platform,
-  StyleProp,
-  StyleSheet,
-  Text,
-  TextStyle,
-} from "react-native";
+import { Platform, StyleProp, StyleSheet, Text, TextStyle } from "react-native";
 
 type Props = {
   content: string;
