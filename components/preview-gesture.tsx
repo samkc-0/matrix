@@ -41,10 +41,9 @@ export default function PreviewGesture({ tensor }: PreviewGestureProps) {
     <canvas
       ref={canvasRef}
       style={{
-        border: "1px solid #ccc",
         imageRendering: "pixelated", // 🔥 clave para MNIST-style
-        width: "10vw",
-        height: "10vw",
+        width: "20vw",
+        height: "20vw",
         position: "fixed",
         top: 0,
         left: 0,
