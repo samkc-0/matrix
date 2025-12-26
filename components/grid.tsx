@@ -43,7 +43,7 @@ export function Cell({ children, style = undefined }: CellProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "black",
+    backgroundColor: "white",
     width: "80%",
     height: "80%",
     aspectRatio: 1,

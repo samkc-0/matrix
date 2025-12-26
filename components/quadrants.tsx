@@ -57,8 +57,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     aspectRatio: 1,
-    borderColor: "black",
-    borderWidth: 2,
   },
   row: {
     flex: 1,
@@ -69,7 +67,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     aspectRatio: 1,
-    backgroundColor: "black",
+    backgroundColor: "white",
   },
 });
 

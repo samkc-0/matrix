@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     maxHeight: "100%",
-    backgroundColor: "black",
+    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
   },
