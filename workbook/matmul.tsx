@@ -13,6 +13,7 @@ import GestureCanvas from "@/components/gesture-canvas";
 import useDigitClassifier from "@/utils/use-digit-classifier";
 import GesturePreview from "@/components/preview-gesture";
 import preprocessGesture from "@/utils/preprocess-gesture";
+import MathJaxText from "@/components/mathjax-text";
 
 export default function Matmul() {
   const problem = testProblem;
@@ -104,11 +105,14 @@ export default function Matmul() {
   return (
     <View style={styles.container}>
       <Quadrants>
-        <Text
-          style={{ color: "black", fontFamily: "JetBrains Mono, monospace" }}
-        >
-          {formatEquation(keySequence[0])}
-        </Text>
+        <MathJaxText
+          content={formatEquation(keySequence[0])}
+          style={{
+            color: "black",
+            fontFamily: "JetBrains Mono, monospace",
+            fontSize: 24,
+          }}
+        />
 
         {/* Matrix B (top right) */}
         <Grid data={problem.b} renderItem={renderB} />
