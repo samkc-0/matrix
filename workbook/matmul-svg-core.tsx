@@ -31,6 +31,7 @@ const EQUATION_AVERAGE_CHAR_WIDTH = 0.72;
 const FALLBACK_EQUATION_FONT_SIZE = 24;
 const GRID_WIDTH = QUADRANT_SIZE - QUADRANT_PADDING * 2;
 const GRID_HEIGHT = QUADRANT_SIZE - QUADRANT_PADDING * 2 - LABEL_OFFSET;
+const COMPLETION_ADVANCE_DELAY_MS = 600;
 
 type MatmulProps = {
   problem: MatmulProblem;
@@ -60,12 +61,19 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   );
 
   const completionNotifiedRef = useRef(false);
+  const completionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const digitClassifier = useDigitClassifier();
 
   useEffect(() => {
     setKeySequence(generateKeyPresses(problem));
     completionNotifiedRef.current = false;
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current);
+      completionTimeoutRef.current = null;
+    }
     setPreviewGesture((prev) => {
       prev?.dispose();
       return null;
@@ -75,7 +83,10 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   useEffect(() => {
     if (keySequence.length === 0 && !completionNotifiedRef.current) {
       completionNotifiedRef.current = true;
-      onComplete?.();
+      completionTimeoutRef.current = setTimeout(() => {
+        completionTimeoutRef.current = null;
+        onComplete?.();
+      }, COMPLETION_ADVANCE_DELAY_MS);
     }
   }, [keySequence, onComplete]);
 
@@ -166,6 +177,9 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
       if (cellFlashTimeoutRef.current) {
         clearTimeout(cellFlashTimeoutRef.current);
       }
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -214,10 +228,10 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   );
 
   const quadrants = useMemo(() => {
-    if (!keySequence.length) return null;
-    const current = keySequence[0]!;
+    const current = keySequence[0] ?? null;
     const quadrantList = [];
-    const equationText = shouldShowEquation ? formatEquation(current) : null;
+    const equationText =
+      current && shouldShowEquation ? formatEquation(current) : null;
     const equationFontSize = equationText
       ? calculateEquationFontSize(equationText)
       : FALLBACK_EQUATION_FONT_SIZE;
@@ -262,8 +276,8 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
 
     return quadrantList;
   }, [
-    problem,
     keySequence,
+    problem,
     formatEquation,
     shouldShowEquation,
     flashCell,
@@ -285,14 +299,6 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
         <Text style={styles.statusText}>
           Loading...(model status: {digitClassifier.status})
         </Text>
-      </View>
-    );
-  }
-
-  if (keySequence.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.statusText}>All done!</Text>
       </View>
     );
   }
