@@ -1,4 +1,9 @@
+export type Problem = {
+  problemType: string;
+};
+
 export type MatmulProblem = {
+  problemType: "matmul";
   showEquation: boolean;
   matrixLabels: {
     a: string;

@@ -1,7 +1,8 @@
-import type { MatmulProblem } from "@/types/problems";
+import type { Problem } from "@/types/problems";
 
-export const testProblems: MatmulProblem[] = [
+export const testProblems: Problem[] = [
   {
+    problemType: "matmul",
     showEquation: false,
     matrixLabels: {
       a: "",
