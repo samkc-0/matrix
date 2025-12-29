@@ -48,9 +48,13 @@ export default function MatmulSvgCore() {
   }, []);
 
   useEffect(() => {
+    // keyboard only supported on web
     if (Platform.OS !== "web") return;
+
     const onKeyDown = (e: KeyboardEvent) => handleKeyPress(e.key);
+
     document.addEventListener("keydown", onKeyDown);
+
     return () => {
       document.removeEventListener("keydown", onKeyDown);
     };
@@ -60,26 +64,38 @@ export default function MatmulSvgCore() {
     ({ row, col }: KeySequence[number]) => {
       const aTerms = problem.a[row];
       const bTerms = problem.b.map((matrixRow) => matrixRow[col]);
+
       const pairs: string[] = [];
+
       for (let i = 0; i < aTerms.length; i++) {
-        pairs.push(`${aTerms[i]}×${bTerms[i]}`);
+        pairs.push(`${aTerms[i]} × ${bTerms[i]}`);
       }
+
       return `${pairs.join(" + ")} =`;
     },
     [problem.a, problem.b],
   );
 
+  useEffect(() => {
+    return () => {
+      previewGesture?.dispose();
+    };
+  }, [previewGesture]);
+
   const handleStrokeEnd = useCallback(
     async (points: PointInTime[]) => {
       const gestureAsTensor = preprocessGesture(points);
+
       setPreviewGesture((prev) => {
         prev?.dispose();
         return gestureAsTensor.clone();
       });
+
       if (digitClassifier.modelLoaded) {
         const digit = digitClassifier.classify(gestureAsTensor);
         handleKeyPress(String(digit));
       }
+
       gestureAsTensor.dispose();
     },
     [digitClassifier, handleKeyPress],
@@ -91,12 +107,6 @@ export default function MatmulSvgCore() {
   const safeHeight = height || fallbackWindow.height || 0;
   const haveDimensions = safeWidth > 1 && safeHeight > 1;
   const squareSize = Math.max(1, Math.min(safeWidth, safeHeight));
-
-  useEffect(() => {
-    return () => {
-      previewGesture?.dispose();
-    };
-  }, [previewGesture]);
 
   const quadrants = useMemo(() => {
     if (!keySequence.length) return null;
