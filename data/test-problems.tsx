@@ -2,7 +2,7 @@ import type { Problem } from "@/types/problems";
 
 export const testProblems: Problem[] = [
   {
-    problemType: "matmul",
+    type: "matmul",
     showEquation: false,
     matrixLabels: {
       a: "",

@@ -1,5 +1,5 @@
 export type MatmulProblem = {
-  problemType: "matmul";
+  type: "matmul";
   showEquation: boolean;
   matrixLabels: {
     a: string;
@@ -18,8 +18,4 @@ export type MatmulProblem = {
   detail: string;
 };
 
-export type Problem =
-  | {
-      problemType: string;
-    }
-  | MatmulProblem;
+export type Problem = MatmulProblem;
