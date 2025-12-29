@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Platform,
@@ -34,18 +34,64 @@ export default function MatmulSvgCore() {
     generateKeyPresses(problem),
   );
   const [previewGesture, setPreviewGesture] = useState<tf.Tensor | null>(null);
+  const [flashCell, setFlashCell] = useState<{
+    label: MatrixLabel;
+    row: number;
+    col: number;
+    color: "success" | "error";
+  } | null>(null);
+  const cellFlashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const digitClassifier = useDigitClassifier();
 
-  const handleKeyPress = useCallback((key: string) => {
-    setKeySequence((prev) => {
-      if (prev.length === 0) return prev;
-      if (prev[0].expectedKey === key) {
-        return prev.slice(1);
+  const triggerCellFlash = useCallback(
+    (
+      cell: { label: MatrixLabel; row: number; col: number },
+      color: "success" | "error",
+    ) => {
+      setFlashCell({ ...cell, color });
+      if (cellFlashTimeoutRef.current) {
+        clearTimeout(cellFlashTimeoutRef.current);
       }
-      return prev;
-    });
-  }, []);
+      cellFlashTimeoutRef.current = setTimeout(() => {
+        setFlashCell(null);
+        cellFlashTimeoutRef.current = null;
+      }, 200);
+    },
+    [],
+  );
+
+  const handleKeyPress = useCallback(
+    (key: string) => {
+      setKeySequence((prev) => {
+        if (prev.length === 0) return prev;
+        const current = prev[0];
+        if (current.expectedKey === key) {
+          triggerCellFlash(
+            {
+              label: current.label as MatrixLabel,
+              row: current.row,
+              col: current.col,
+            },
+            "success",
+          );
+          return prev.slice(1);
+        }
+        triggerCellFlash(
+          {
+            label: current.label as MatrixLabel,
+            row: current.row,
+            col: current.col,
+          },
+          "error",
+        );
+        return prev;
+      });
+    },
+    [triggerCellFlash],
+  );
 
   useEffect(() => {
     // keyboard only supported on web
@@ -81,6 +127,14 @@ export default function MatmulSvgCore() {
       previewGesture?.dispose();
     };
   }, [previewGesture]);
+
+  useEffect(() => {
+    return () => {
+      if (cellFlashTimeoutRef.current) {
+        clearTimeout(cellFlashTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleStrokeEnd = useCallback(
     async (points: PointInTime[]) => {
@@ -145,7 +199,7 @@ export default function MatmulSvgCore() {
         render: () => renderMatrix(problem.c, "c"),
       },
     ];
-  }, [problem, keySequence, formatEquation]);
+  }, [problem, keySequence, formatEquation, flashCell]);
 
   if (digitClassifier.error) {
     return (
@@ -253,6 +307,16 @@ export default function MatmulSvgCore() {
             const display = getCellDisplay(label, rowIndex, colIndex, value);
             const fontSize =
               cellWidth * 0.35 - Math.max(display.value.length - 1, 0) * 6;
+            const isFlashCell =
+              flashCell?.label === label &&
+              flashCell.row === rowIndex &&
+              flashCell.col === colIndex;
+            const strokeColor = isFlashCell
+              ? flashCell?.color === "error"
+                ? "#ef4444"
+                : "#22c55e"
+              : "black";
+            const strokeWidth = isFlashCell ? 6 : 2;
             return (
               <G key={`${label}-${rowIndex}-${colIndex}`}>
                 <Rect
@@ -263,8 +327,8 @@ export default function MatmulSvgCore() {
                   rx={3}
                   ry={3}
                   fill={display.fill}
-                  stroke="black"
-                  strokeWidth={2}
+                  stroke={strokeColor}
+                  strokeWidth={strokeWidth}
                 />
                 <SvgText
                   x={x + cellWidth / 2}
@@ -365,6 +429,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 16,
+    position: "relative",
   },
   svgWrapper: {
     justifyContent: "center",
