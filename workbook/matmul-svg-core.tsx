@@ -26,6 +26,9 @@ const QUADRANT_SIZE = VIEWBOX_SIZE / 2;
 const QUADRANT_PADDING = 60;
 const CELL_GAP = 18;
 const LABEL_OFFSET = 48;
+const EQUATION_SAFE_AREA_RATIO = 0.85;
+const EQUATION_AVERAGE_CHAR_WIDTH = 0.72;
+const FALLBACK_EQUATION_FONT_SIZE = 24;
 
 type MatmulProps = {
   problem: MatmulProblem;
@@ -194,8 +197,12 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
     if (!keySequence.length) return null;
     const current = keySequence[0]!;
     const quadrantList = [];
+    const equationText = shouldShowEquation ? formatEquation(current) : null;
+    const equationFontSize = equationText
+      ? calculateEquationFontSize(equationText)
+      : FALLBACK_EQUATION_FONT_SIZE;
 
-    if (shouldShowEquation) {
+    if (equationText) {
       quadrantList.push({
         id: "equation",
         origin: { x: 0, y: 0 },
@@ -206,10 +213,10 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
             textAnchor="middle"
             alignmentBaseline="middle"
             fill="black"
-            fontSize={24}
+            fontSize={equationFontSize}
             fontFamily="JetBrains Mono, monospace"
           >
-            {formatEquation(current)}
+            {equationText}
           </SvgText>
         ),
       });
@@ -460,6 +467,30 @@ function formatNumber(n: number): string {
   return Number.isInteger(n)
     ? n.toString()
     : parseFloat(n.toString()).toString();
+}
+
+function calculateEquationFontSize(text: string) {
+  if (!text.length) {
+    return FALLBACK_EQUATION_FONT_SIZE;
+  }
+
+  const usableSide =
+    (QUADRANT_SIZE - QUADRANT_PADDING * 2) * EQUATION_SAFE_AREA_RATIO;
+  if (usableSide <= 0) {
+    return FALLBACK_EQUATION_FONT_SIZE;
+  }
+
+  const charCount = Math.max(text.length, 1);
+  const widthBasedSize =
+    usableSide / (charCount * EQUATION_AVERAGE_CHAR_WIDTH || 1);
+  const maxHeight = usableSide;
+  const computedSize = Math.min(widthBasedSize, maxHeight);
+
+  if (!Number.isFinite(computedSize) || computedSize <= 0) {
+    return FALLBACK_EQUATION_FONT_SIZE;
+  }
+
+  return computedSize;
 }
 
 const styles = StyleSheet.create({

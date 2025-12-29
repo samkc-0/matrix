@@ -3,7 +3,7 @@ import type { Problem } from "@/types/problems";
 export const testProblems: Problem[] = [
   {
     type: "matmul",
-    showEquation: false,
+    showEquation: true,
     matrixLabels: {
       a: "",
       b: "",
@@ -29,7 +29,7 @@ export const testProblems: Problem[] = [
   },
   {
     type: "matmul",
-    showEquation: false,
+    showEquation: true,
     matrixLabels: {
       a: "k",
       b: "v",
@@ -100,7 +100,7 @@ export const testProblems: Problem[] = [
   },
   {
     type: "matmul",
-    showEquation: false,
+    showEquation: true,
     matrixLabels: {
       a: "",
       b: "",
