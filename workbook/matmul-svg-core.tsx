@@ -281,6 +281,8 @@ export default function MatmulSvgCore() {
     const cols = data[0]?.length ?? 0;
     if (rows === 0 || cols === 0) return null;
 
+    const displayLabel =
+      problem.matrixLabels?.[label] ?? label.toUpperCase();
     const gridWidth = QUADRANT_SIZE - QUADRANT_PADDING * 2;
     const gridHeight = QUADRANT_SIZE - QUADRANT_PADDING * 2 - LABEL_OFFSET;
     const cellWidth = (gridWidth - CELL_GAP * (cols - 1)) / cols;
@@ -298,7 +300,7 @@ export default function MatmulSvgCore() {
           fill="#0f172a"
           fontFamily="sans-serif"
         >
-          {label.toUpperCase()}
+          {displayLabel}
         </SvgText>
         {data.map((row, rowIndex) => {
           return row.map((value, colIndex) => {

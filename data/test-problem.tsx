@@ -1,4 +1,9 @@
 export const testProblem = {
+  matrixLabels: {
+    a: "A",
+    b: "X",
+    c: "Y",
+  },
   a: [
     [2, 7, 9],
     [0, 0, 3],
