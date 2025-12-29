@@ -29,6 +29,8 @@ const LABEL_OFFSET = 48;
 const EQUATION_SAFE_AREA_RATIO = 0.85;
 const EQUATION_AVERAGE_CHAR_WIDTH = 0.72;
 const FALLBACK_EQUATION_FONT_SIZE = 24;
+const GRID_WIDTH = QUADRANT_SIZE - QUADRANT_PADDING * 2;
+const GRID_HEIGHT = QUADRANT_SIZE - QUADRANT_PADDING * 2 - LABEL_OFFSET;
 
 type MatmulProps = {
   problem: MatmulProblem;
@@ -193,6 +195,24 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   const haveDimensions = safeWidth > 1 && safeHeight > 1;
   const squareSize = Math.max(1, Math.min(safeWidth, safeHeight));
 
+  const { maxRows, maxCols } = useMemo(() => {
+    const matrices = [problem.a, problem.b, problem.c];
+    const rows = Math.max(
+      ...matrices.map((matrix) => matrix.length || 0),
+      1,
+    );
+    const cols = Math.max(
+      ...matrices.map((matrix) => matrix[0]?.length ?? 0),
+      1,
+    );
+    return { maxRows: rows, maxCols: cols };
+  }, [problem]);
+
+  const uniformCellSize = useMemo(
+    () => calculateUniformCellSize(maxRows, maxCols),
+    [maxRows, maxCols],
+  );
+
   const quadrants = useMemo(() => {
     if (!keySequence.length) return null;
     const current = keySequence[0]!;
@@ -241,7 +261,14 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
     );
 
     return quadrantList;
-  }, [problem, keySequence, formatEquation, shouldShowEquation, flashCell]);
+  }, [
+    problem,
+    keySequence,
+    formatEquation,
+    shouldShowEquation,
+    flashCell,
+    uniformCellSize,
+  ]);
 
   if (digitClassifier.error) {
     return (
@@ -324,11 +351,19 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
     if (rows === 0 || cols === 0) return null;
 
     const displayLabel = problem.matrixLabels?.[label] ?? label.toUpperCase();
-    const gridWidth = QUADRANT_SIZE - QUADRANT_PADDING * 2;
-    const gridHeight = QUADRANT_SIZE - QUADRANT_PADDING * 2 - LABEL_OFFSET;
-    const cellWidth = (gridWidth - CELL_GAP * (cols - 1)) / cols;
-    const startX = QUADRANT_PADDING;
-    const startY = QUADRANT_PADDING + LABEL_OFFSET;
+    const cellSize = uniformCellSize;
+    if (!Number.isFinite(cellSize) || cellSize <= 0) {
+      return null;
+    }
+
+    const matrixWidth = cellSize * cols + CELL_GAP * (cols - 1);
+    const matrixHeight = cellSize * rows + CELL_GAP * (rows - 1);
+    const startX =
+      QUADRANT_PADDING + Math.max((GRID_WIDTH - matrixWidth) / 2, 0);
+    const startY =
+      QUADRANT_PADDING +
+      LABEL_OFFSET +
+      Math.max((GRID_HEIGHT - matrixHeight) / 2, 0);
 
     return (
       <G>
@@ -345,11 +380,11 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
         </SvgText>
         {data.map((row, rowIndex) => {
           return row.map((value, colIndex) => {
-            const x = startX + colIndex * (cellWidth + CELL_GAP);
-            const y = startY + rowIndex * (cellWidth + CELL_GAP);
+            const x = startX + colIndex * (cellSize + CELL_GAP);
+            const y = startY + rowIndex * (cellSize + CELL_GAP);
             const display = getCellDisplay(label, rowIndex, colIndex, value);
             const fontSize =
-              cellWidth * 0.35 - Math.max(display.value.length - 1, 0) * 6;
+              cellSize * 0.35 - Math.max(display.value.length - 1, 0) * 6;
             const isFlashCell =
               flashCell?.label === label &&
               flashCell.row === rowIndex &&
@@ -365,8 +400,8 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
                 <Rect
                   x={x}
                   y={y}
-                  width={cellWidth}
-                  height={cellWidth}
+                  width={cellSize}
+                  height={cellSize}
                   rx={3}
                   ry={3}
                   fill={display.fill}
@@ -374,8 +409,8 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
                   strokeWidth={strokeWidth}
                 />
                 <SvgText
-                  x={x + cellWidth / 2}
-                  y={y + cellWidth / 2}
+                  x={x + cellSize / 2}
+                  y={y + cellSize / 2}
                   textAnchor="middle"
                   alignmentBaseline="middle"
                   fontFamily="Comic Sans MS"
@@ -432,6 +467,20 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
 
     return { value: textValue, textColor, fill };
   }
+}
+
+function calculateUniformCellSize(maxRows: number, maxCols: number) {
+  const safeRows = Math.max(maxRows, 1);
+  const safeCols = Math.max(maxCols, 1);
+  const widthBased =
+    (GRID_WIDTH - CELL_GAP * (safeCols - 1)) / safeCols;
+  const heightBased =
+    (GRID_HEIGHT - CELL_GAP * (safeRows - 1)) / safeRows;
+  const candidate = Math.min(widthBased, heightBased);
+  if (!Number.isFinite(candidate) || candidate <= 0) {
+    return Math.min(GRID_WIDTH, GRID_HEIGHT);
+  }
+  return candidate;
 }
 
 function generateKeyPresses(
