@@ -1,7 +1,3 @@
-export type Problem = {
-  problemType: string;
-};
-
 export type MatmulProblem = {
   problemType: "matmul";
   showEquation: boolean;
@@ -21,3 +17,9 @@ export type MatmulProblem = {
   valid: boolean;
   detail: string;
 };
+
+export type Problem =
+  | {
+      problemType: string;
+    }
+  | MatmulProblem;
