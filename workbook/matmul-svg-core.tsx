@@ -68,7 +68,7 @@ export default function MatmulSvgCore() {
       const pairs: string[] = [];
 
       for (let i = 0; i < aTerms.length; i++) {
-        pairs.push(`${aTerms[i]} × ${bTerms[i]}`);
+        pairs.push(`${aTerms[i]}×${bTerms[i]}`);
       }
 
       return `${pairs.join(" + ")} =`;
@@ -122,7 +122,7 @@ export default function MatmulSvgCore() {
             textAnchor="middle"
             alignmentBaseline="middle"
             fill="black"
-            fontSize={36}
+            fontSize={24}
             fontFamily="JetBrains Mono, monospace"
           >
             {formatEquation(current)}
