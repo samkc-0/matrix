@@ -29,6 +29,7 @@ const LABEL_OFFSET = 48;
 
 export default function MatmulSvgCore() {
   const problem = testProblem;
+  const shouldShowEquation = problem.showEquation ?? true;
 
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
@@ -165,8 +166,10 @@ export default function MatmulSvgCore() {
   const quadrants = useMemo(() => {
     if (!keySequence.length) return null;
     const current = keySequence[0]!;
-    return [
-      {
+    const quadrantList = [];
+
+    if (shouldShowEquation) {
+      quadrantList.push({
         id: "equation",
         origin: { x: 0, y: 0 },
         render: () => (
@@ -182,7 +185,10 @@ export default function MatmulSvgCore() {
             {formatEquation(current)}
           </SvgText>
         ),
-      },
+      });
+    }
+
+    quadrantList.push(
       {
         id: "b",
         origin: { x: QUADRANT_SIZE, y: 0 },
@@ -198,8 +204,10 @@ export default function MatmulSvgCore() {
         origin: { x: QUADRANT_SIZE, y: QUADRANT_SIZE },
         render: () => renderMatrix(problem.c, "c"),
       },
-    ];
-  }, [problem, keySequence, formatEquation, flashCell]);
+    );
+
+    return quadrantList;
+  }, [problem, keySequence, formatEquation, shouldShowEquation, flashCell]);
 
   if (digitClassifier.error) {
     return (
