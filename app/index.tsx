@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
-import { Text, View } from "react-native";
-
-import Matmul from "@/workbook/matmul-svg-core";
 import { testProblems } from "@/data/test-problems";
 import type { MatmulProblem, Problem } from "@/types/problems";
+
+import Message from "@/components/message";
+import Matmul from "@/workbook/matmul-svg-core";
 
 export default function Index() {
   const problems: Problem[] = testProblems;
@@ -14,11 +14,7 @@ export default function Index() {
   }, [problems.length]);
 
   if (currentIndex >= problems.length) {
-    return (
-      <View>
-        <Text>All problems completed!</Text>
-      </View>
-    );
+    return <Message text="All problems completed!" />;
   }
 
   return (
@@ -43,10 +39,6 @@ function ProblemHandler({ problem, onProblemComplete }: ProblemHandlerProps) {
         />
       );
     default:
-      return (
-        <View>
-          <Text>Unsupported problem type</Text>
-        </View>
-      );
+      return <Message text={`Unsupported problem type: ${problem.type}`} />;
   }
 }
