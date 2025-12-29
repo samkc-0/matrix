@@ -10,9 +10,9 @@ import {
 import * as tf from "@tensorflow/tfjs";
 import { G, Rect, Svg, Text as SvgText } from "react-native-svg";
 
-import { testProblem } from "@/data/test-problem";
 import type KeySequence from "@/types/key-sequence";
 import type PointInTime from "@/types/point-in-time";
+import type { MatmulProblem } from "@/types/problems";
 
 import GestureCanvas from "@/components/gesture-canvas";
 import GesturePreview from "@/components/preview-gesture";
@@ -27,8 +27,11 @@ const QUADRANT_PADDING = 60;
 const CELL_GAP = 18;
 const LABEL_OFFSET = 48;
 
-export default function MatmulSvgCore() {
-  const problem = testProblem;
+type MatmulProps = {
+  problem: MatmulProblem;
+};
+
+export default function MatmulSvgCore({ problem }: MatmulProps) {
   const shouldShowEquation = problem.showEquation ?? true;
 
   const [keySequence, setKeySequence] = useState<KeySequence>(
@@ -289,8 +292,7 @@ export default function MatmulSvgCore() {
     const cols = data[0]?.length ?? 0;
     if (rows === 0 || cols === 0) return null;
 
-    const displayLabel =
-      problem.matrixLabels?.[label] ?? label.toUpperCase();
+    const displayLabel = problem.matrixLabels?.[label] ?? label.toUpperCase();
     const gridWidth = QUADRANT_SIZE - QUADRANT_PADDING * 2;
     const gridHeight = QUADRANT_SIZE - QUADRANT_PADDING * 2 - LABEL_OFFSET;
     const cellWidth = (gridWidth - CELL_GAP * (cols - 1)) / cols;
