@@ -29,9 +29,10 @@ const LABEL_OFFSET = 48;
 
 type MatmulProps = {
   problem: MatmulProblem;
+  onComplete?: () => void;
 };
 
-export default function MatmulSvgCore({ problem }: MatmulProps) {
+export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   const shouldShowEquation = problem.showEquation ?? true;
 
   const [keySequence, setKeySequence] = useState<KeySequence>(
@@ -48,7 +49,25 @@ export default function MatmulSvgCore({ problem }: MatmulProps) {
     null,
   );
 
+  const completionNotifiedRef = useRef(false);
+
   const digitClassifier = useDigitClassifier();
+
+  useEffect(() => {
+    setKeySequence(generateKeyPresses(problem));
+    completionNotifiedRef.current = false;
+    setPreviewGesture((prev) => {
+      prev?.dispose();
+      return null;
+    });
+  }, [problem]);
+
+  useEffect(() => {
+    if (keySequence.length === 0 && !completionNotifiedRef.current) {
+      completionNotifiedRef.current = true;
+      onComplete?.();
+    }
+  }, [keySequence, onComplete]);
 
   const triggerCellFlash = useCallback(
     (
