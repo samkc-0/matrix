@@ -34,6 +34,11 @@ type MatmulProps = {
 
 export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
   const shouldShowEquation = problem.showEquation ?? true;
+  const {
+    rows: highlightRowsEnabled = true,
+    columns: highlightColumnsEnabled = true,
+    targetCell: highlightTargetCellEnabled = true,
+  } = problem.highlighting ?? {};
 
   const [keySequence, setKeySequence] = useState<KeySequence>(
     generateKeyPresses(problem),
@@ -405,9 +410,15 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
       textValue = "";
     }
 
-    const isRowTerm = label === "a" && ks?.row === row;
-    const isColTerm = label === "b" && ks?.col === col;
-    const isTarget = ks?.label === label && ks.row === row && ks.col === col;
+    const isRowTerm =
+      highlightRowsEnabled && label === "a" && ks?.row === row;
+    const isColTerm =
+      highlightColumnsEnabled && label === "b" && ks?.col === col;
+    const isTarget =
+      highlightTargetCellEnabled &&
+      ks?.label === label &&
+      ks.row === row &&
+      ks.col === col;
     const shouldHighlight = isRowTerm || isColTerm || isTarget;
 
     const fill = shouldHighlight ? "violet" : "#ffffff";

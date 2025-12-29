@@ -2,6 +2,12 @@ export type MatrixLabel = "a" | "b" | "c";
 
 type MatrixLabels = Partial<Record<MatrixLabel, string>>;
 
+type HighlightingOptions = {
+  rows?: boolean;
+  columns?: boolean;
+  targetCell?: boolean;
+};
+
 export type MatmulProblem = {
   problemType: "matmul";
   showEquation?: boolean;
@@ -16,6 +22,7 @@ export type MatmulProblem = {
   }>;
   valid: boolean;
   detail: string;
+  highlighting?: HighlightingOptions;
 };
 
 export default MatmulProblem;

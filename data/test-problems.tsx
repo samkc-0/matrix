@@ -9,6 +9,11 @@ export const testProblems: Problem[] = [
       b: "",
       c: "",
     },
+    highlighting: {
+      rows: false,
+      columns: false,
+      targetCell: false,
+    },
     a: [[3]],
     b: [[4]],
     c: [[12]],
