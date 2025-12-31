@@ -109,6 +109,7 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
 
   const handleKeyPress = useCallback(
     (key: string) => {
+      console.log("pressed:", key);
       setKeySequence((prev) => {
         if (prev.length === 0) return prev;
         const current = prev[0];
@@ -346,7 +347,10 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
           ))}
         </Svg>
       </View>
-      <GestureCanvas onStrokeEnd={handleStrokeEnd} />
+      <GestureCanvas
+        onStrokeEnd={handleStrokeEnd}
+        fallback={() => handleKeyPress(".")}
+      />
       {previewGesture && <GesturePreview tensor={previewGesture} />}
     </View>
   );

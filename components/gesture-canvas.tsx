@@ -4,12 +4,19 @@ import Svg, { Polyline } from "react-native-svg";
 
 import { PointInTime, PointsHandler } from "@/types/point-in-time";
 
+type GestureCanvasProps = {
+  onStrokeEnd: PointsHandler;
+  fallback?: () => void;
+};
+
+const TAP_MOVEMENT_THRESHOLD_SQ = 25; // roughly 5px movement before treating as a stroke
+
 export default function GestureCanvas({
   onStrokeEnd,
-}: {
-  onStrokeEnd: PointsHandler;
-}) {
+  fallback,
+}: GestureCanvasProps) {
   const pointsRef = useRef<PointInTime[]>([]);
+  const isTapRef = useRef(true);
   const [renderPoints, setRenderPoints] = useState<{ x: number; y: number }[]>(
     [],
   );
@@ -20,6 +27,7 @@ export default function GestureCanvas({
 
       onPanResponderGrant: (event) => {
         pointsRef.current = [];
+        isTapRef.current = true;
         const p = {
           x: event.nativeEvent.locationX,
           y: event.nativeEvent.locationY,
@@ -35,6 +43,14 @@ export default function GestureCanvas({
           y: event.nativeEvent.locationY,
           t: Date.now(),
         };
+        const firstPoint = pointsRef.current[0];
+        if (firstPoint) {
+          const dx = p.x - firstPoint.x;
+          const dy = p.y - firstPoint.y;
+          if (dx * dx + dy * dy > TAP_MOVEMENT_THRESHOLD_SQ) {
+            isTapRef.current = false;
+          }
+        }
         pointsRef.current.push(p);
         setRenderPoints([
           ...pointsRef.current.map((pt) => ({ x: pt.x, y: pt.y })),
@@ -42,7 +58,11 @@ export default function GestureCanvas({
       },
 
       onPanResponderRelease: () => {
-        onStrokeEnd(pointsRef.current);
+        if (isTapRef.current && fallback) {
+          fallback();
+        } else {
+          onStrokeEnd(pointsRef.current);
+        }
         pointsRef.current = [];
         setRenderPoints([]);
       },
