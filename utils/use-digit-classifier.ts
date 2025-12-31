@@ -77,10 +77,10 @@ export default function useDigitClassifier() {
 
       console.log(prediction);
 
-      const digit = prediction.argMax(-1).dataSync()[0];
+      const label = prediction.argMax(-1).dataSync()[0];
 
       prediction.dispose();
-      return String(digit);
+      return label;
     },
     [model],
   );

@@ -43,7 +43,7 @@ def generate_dot_image(rng: np.random.Generator) -> np.ndarray:
 
 EXTRA_CHAR_GENERATORS = {
     "-": generate_dash_image,
-    ".": generate_dot_image,
+#    ".": generate_dot_image,
 }
 
 
@@ -121,3 +121,16 @@ model.fit(
 # Export to TFJS
 tfjs.converters.save_keras_model(model, MODEL_OUTPUT_DIR)
 print(f"✅ Model exported to {MODEL_OUTPUT_DIR}/")
+
+
+pred = model.predict(x_test)
+y_true = np.argmax(y_test, axis=1)
+y_pred = np.argmax(pred, axis=1)
+
+# After training, print accuracy specifically for the extra classes:
+extra_chars = [(10, "-"), (11, ".")]
+
+for label, name in extra_chars[:-1]:
+    mask = y_true == label
+    acc = np.mean(y_pred[mask] == y_true[mask])
+    print(name, "accuracy:", acc)

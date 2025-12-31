@@ -193,8 +193,11 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
       });
 
       if (digitClassifier.modelLoaded) {
-        const digit = digitClassifier.classify(gestureAsTensor);
-        handleKeyPress(String(digit));
+        const label = digitClassifier.classify(gestureAsTensor);
+        const digit = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-"][
+          label
+        ];
+        handleKeyPress(digit);
       }
 
       gestureAsTensor.dispose();
@@ -211,10 +214,7 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
 
   const { maxRows, maxCols } = useMemo(() => {
     const matrices = [problem.a, problem.b, problem.c];
-    const rows = Math.max(
-      ...matrices.map((matrix) => matrix.length || 0),
-      1,
-    );
+    const rows = Math.max(...matrices.map((matrix) => matrix.length || 0), 1);
     const cols = Math.max(
       ...matrices.map((matrix) => matrix[0]?.length ?? 0),
       1,
@@ -458,8 +458,7 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
       textValue = "";
     }
 
-    const isRowTerm =
-      highlightRowsEnabled && label === "a" && ks?.row === row;
+    const isRowTerm = highlightRowsEnabled && label === "a" && ks?.row === row;
     const isColTerm =
       highlightColumnsEnabled && label === "b" && ks?.col === col;
     const isTarget =
@@ -478,10 +477,8 @@ export default function MatmulSvgCore({ problem, onComplete }: MatmulProps) {
 function calculateUniformCellSize(maxRows: number, maxCols: number) {
   const safeRows = Math.max(maxRows, 1);
   const safeCols = Math.max(maxCols, 1);
-  const widthBased =
-    (GRID_WIDTH - CELL_GAP * (safeCols - 1)) / safeCols;
-  const heightBased =
-    (GRID_HEIGHT - CELL_GAP * (safeRows - 1)) / safeRows;
+  const widthBased = (GRID_WIDTH - CELL_GAP * (safeCols - 1)) / safeCols;
+  const heightBased = (GRID_HEIGHT - CELL_GAP * (safeRows - 1)) / safeRows;
   const candidate = Math.min(widthBased, heightBased);
   if (!Number.isFinite(candidate) || candidate <= 0) {
     return Math.min(GRID_WIDTH, GRID_HEIGHT);

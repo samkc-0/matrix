@@ -48,10 +48,10 @@ export default function useDigitClassifier() {
       return tf.tidy(() => {
         const prediction = model.predict(gestureAsTensor) as tf.Tensor;
         const digitTensor = prediction.argMax(-1);
-        const digit = digitTensor.dataSync()[0];
+        const label = digitTensor.dataSync()[0];
 
         prediction.dispose();
-        return String(digit);
+        return label;
       });
     },
     [model],
