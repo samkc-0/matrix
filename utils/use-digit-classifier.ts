@@ -3,40 +3,77 @@ import * as tf from "@tensorflow/tfjs";
 
 type Status = "loading" | "ready" | "error";
 
+let cachedModel: tf.LayersModel | null = null;
+let cachedError: Error | null = null;
+let modelLoadPromise: Promise<tf.LayersModel> | null = null;
+
 export default function useDigitClassifier() {
-  const [model, setModel] = useState<tf.LayersModel | null>(null);
-  const [status, setStatus] = useState<Status>("loading");
-  const [error, setError] = useState<Error | null>(null);
+  const [model, setModel] = useState<tf.LayersModel | null>(cachedModel);
+  const [status, setStatus] = useState<Status>(
+    cachedModel ? "ready" : cachedError ? "error" : "loading",
+  );
+  const [error, setError] = useState<Error | null>(cachedError);
 
   useEffect(() => {
     let mounted = true;
-    async function load() {
-      try {
+
+    const updateState = (
+      nextModel: tf.LayersModel | null,
+      nextStatus: Status,
+      nextError: Error | null,
+    ) => {
+      if (!mounted) return;
+      setModel(nextModel);
+      setStatus(nextStatus);
+      setError(nextError);
+    };
+
+    if (cachedModel) {
+      updateState(cachedModel, "ready", null);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    if (cachedError) {
+      updateState(null, "error", cachedError);
+      return () => {
+        mounted = false;
+      };
+    }
+
+    if (!modelLoadPromise) {
+      modelLoadPromise = (async () => {
         await tf.ready();
         const modelUrl = `${window.location.origin}/models/mnist/model.json`;
-        const loaded = await tf.loadLayersModel(modelUrl);
-        if (mounted) {
-          setModel(loaded);
-          setStatus("ready");
-        }
-      } catch (e) {
-        if (mounted) {
-          setError(e as Error);
-          setStatus("error");
-        }
-      }
+        return tf.loadLayersModel(modelUrl);
+      })();
     }
-    load();
+
+    modelLoadPromise
+      .then((loaded) => {
+        cachedModel = loaded;
+        cachedError = null;
+        updateState(loaded, "ready", null);
+      })
+      .catch((loadErr) => {
+        cachedModel = null;
+        cachedError = loadErr as Error;
+        modelLoadPromise = null;
+        updateState(null, "error", loadErr as Error);
+      });
+
     return () => {
       mounted = false;
     };
   }, []);
   const classify = useCallback(
     (gestureAsTensor: tf.Tensor) => {
-      if (!model) {
+      const activeModel = model ?? cachedModel;
+      if (!activeModel) {
         throw new Error("Model not loaded");
       }
-      const prediction = model.predict(gestureAsTensor) as tf.Tensor;
+      const prediction = activeModel.predict(gestureAsTensor) as tf.Tensor;
 
       console.log(prediction);
 
